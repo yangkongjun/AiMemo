@@ -1,31 +1,18 @@
 # FloatMemo AI（安卓）
 
-当前源码基线：**V0.2.6，versionCode 8**。原生 Java 17，Android 8.0 及以上。
+当前版本：**V0.3.0，versionCode 9**。在V0.2.6上增加生成预算设置、图片插入及完整备份，以及命中位置附近的片段搜索。
 
-开发源码及完整文档位于 [floatmemo-ai 分支](https://github.com/yangkongjun/AiMemo/tree/floatmemo-ai)。首次同步保持应用代码不变；V0.3.0 新需求仍待用户审核，尚未实现。
+- [完整使用说明与构建入口](floatmemo-ai-android/README.md)
+- [V0.3.0使用和开发补充](docs/developer/V0_3_0_Usage_And_Development.md)
+- [原V0.2.6开发手册](docs/developer/FloatMemo_Developer_Guide_Android_V0_2_6.md)：Android Studio、本地修改和签名基础
+- [变更与验证记录](docs/releases/V0_3_0.md)
+- [已批准的需求方案](docs/planning/FloatMemo_Change_Proposal_V0_3_Review.md) 与 [需求实现状态](floatmemo-ai-android/REQUIREMENT_STATUS.md)
+- [每次交付的Git同步约定](docs/GIT_DELIVERY.md)
 
-## 从哪里开始
+源码位于 `floatmemo-ai` 分支。继续使用原包名和签名，先备份后覆盖安装，不卸载。应用数据仍在手机本机，Git同步不包含手机笔记。
 
-- [安卓工程和使用说明](floatmemo-ai-android/README.md)
-- [开发手册](docs/developer/FloatMemo_Developer_Guide_Android_V0_2_6.md)：常见小修改、Android Studio、构建与签名
-- [新需求审核稿](docs/planning/FloatMemo_Change_Proposal_V0_3_Review.md)：token 配置、插图、命中位置摘录及搜索预算
-- [后续开发交接](docs/PROJECT_HANDOFF.md) 与 [每次交付的 Git 同步约定](docs/GIT_DELIVERY.md)
-- [原始需求文档](docs/requirements/FloatMemo_AI_Requirements_V1.docx) 与 [实现状态](floatmemo-ai-android/REQUIREMENT_STATUS.md)
-- [V0.2.6 验证记录](floatmemo-ai-android/VALIDATION.md)
+本版已完成代码和本机自动验证；真机/模拟器交互、覆盖升级、设备中断恢复和真实模型服务仍需验证。具体范围见[验证记录](floatmemo-ai-android/VALIDATION.md)。
 
-## 构建
+仓库不包含API Key、签名私钥、密码、个人笔记、APK或SDK。安装包通过本次交付单独提供，不自动发布GitHub Release或合并main。
 
-在 Android Studio 打开 `floatmemo-ai-android`；使用 JDK 17、SDK 35、Build Tools 35.0.0、Gradle 8.9、AGP 8.7.3。首次构建需下载依赖。
-
-```bash
-cd floatmemo-ai-android
-./gradlew assembleDebug testDebugUnitTest lintDebug
-```
-
-Windows 使用 `gradlew.bat`。本次同步没有重新运行 Gradle 或构建 APK；原 V0.2.6 的记录为52项 JVM 测试及 APK 签名、结构检查通过，真机、当前版模拟器、真实模型服务和 Gradle lint 未在开发环境验收。
-
-默认 debug 签名不能保证覆盖手机上的旧版本。覆盖升级需使用原维护私钥，并递增 versionCode；先导出笔记备份，不通过卸载绕过安装错误。私钥及密码由用户私下保管，仓库不含这些文件。
-
-仓库不包含 APK、个人笔记、API Key、签名私钥、SDK 或完整离线构建工具。手工构建脚本及依赖说明见 [android-build-fix](android-build-fix/README.md)。
-
-本项目在此前 FloatMemo 安卓重写版本上继续开发；原 macOS 参考项目为 https://github.com/DevAutoFarm/floatmemo 。原组件仍遵循各自许可，本次同步不重新授予其许可。
+原macOS参考项目：https://github.com/DevAutoFarm/floatmemo 。原组件遵循各自许可，本次不重新授予其许可。

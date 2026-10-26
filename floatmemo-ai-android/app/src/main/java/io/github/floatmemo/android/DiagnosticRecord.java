@@ -40,7 +40,7 @@ public final class DiagnosticRecord {
         String n=name.toLowerCase(Locale.ROOT).replace("_","").replace("-","");
         return Arrays.asList("authorization","apikey","key","token","accesstoken","secret","password",
             "content","reasoningcontent","reasoning","messages","prompt","input","text","originalnote","originaltitle","query","notes","title","tags",
-            "quote","summary","summaries","points","examples","advice","questions").contains(n);
+            "quote","summary","summaries","points","examples","advice","questions","originalnotesegments","windows","attachments").contains(n);
     }
     private static Object clean(Object object,int depth,String key,String... privateText)throws Exception{
         if(depth>6)return "[深层内容已省略]";

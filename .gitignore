@@ -21,5 +21,7 @@ signing.properties
 android-build-fix/out/
 android-build-fix/tools/
 android-build-fix/platform/
+android-build-fix/tools
+android-build-fix/platform
 android-build-fix/*.jar
 deliverables/

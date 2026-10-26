@@ -1,0 +1,26 @@
+RUN <workspace>/aimemo-git/android-build-fix/tools/android-15/aapt2
+RUN <workspace>/aimemo-git/android-build-fix/tools/android-15/aapt2
+RUN java
+RUN java
+RUN <workspace>/aimemo-git/android-build-fix/tools/android-15/zipalign
+RUN java
+RUN java
+Verifies
+Verified using v1 scheme (JAR signing): false
+Verified using v2 scheme (APK Signature Scheme v2): true
+Verified using v3 scheme (APK Signature Scheme v3): true
+Verified using v3.1 scheme (APK Signature Scheme v3.1): false
+Verified using v4 scheme (APK Signature Scheme v4): false
+Verified for SourceStamp: false
+Number of signers: 1
+RUN <workspace>/aimemo-git/android-build-fix/tools/android-15/zipalign
+INSTALL STRUCTURE PASS resources.arsc uncompressed, offset 2672 aligned True
+RUN java
+RUN java
+JUnit version 4.13.2
+.........................................................................................................
+Time: 0.758
+
+OK (105 tests)
+
+<workspace>/aimemo-git/deliverables/FloatMemo_AI_Android_V0_3_0.apk

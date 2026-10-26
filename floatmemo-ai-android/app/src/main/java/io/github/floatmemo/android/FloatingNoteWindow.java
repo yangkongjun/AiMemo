@@ -20,7 +20,8 @@ public final class FloatingNoteWindow {
     private final OverlayRoot root;
     private final EditText body;
     private final DragTextView title;
-    private final TextView preview, editButton;
+    private final TextView editButton;
+    private final NotePreviewRenderer preview;
     private final LinearLayout content;
     private final ScrollView previewScroll;
     private final View resizeHandle;
@@ -61,14 +62,14 @@ public final class FloatingNoteWindow {
             public void afterTextChanged(Editable value){if(!binding&&editing)repo.update(id,n->n.content=value.toString());}
         });
         content.addView(body,new LinearLayout.LayoutParams(-1,0,1));
-        previewScroll=new ScrollView(context);preview=Ui.text(context,"",note.fontSize,Ui.INK);
+        previewScroll=new ScrollView(context);preview=new NotePreviewRenderer(context);
         preview.setPadding(Ui.dp(context,12),Ui.dp(context,10),Ui.dp(context,12),Ui.dp(context,10));
-        preview.setTextIsSelectable(true);previewScroll.addView(preview);
+        previewScroll.addView(preview);
         content.addView(previewScroll,new LinearLayout.LayoutParams(-1,0,1));
         LinearLayout footer=Ui.row(context);
         TextView previewButton=control("预览 / 原文",v->{setEditing(false);previewing=!previewing;updateContentMode();});
         footer.addView(previewButton);
-        footer.addView(Ui.text(context,"自动保存",10,Ui.MUTED),new LinearLayout.LayoutParams(0,-2,1));
+        footer.addView(control("插图↗",v->{setEditing(false);context.startActivity(new android.content.Intent(context,NoteEditorActivity.class).putExtra("noteId",id).addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK));}),new LinearLayout.LayoutParams(0,-2,1));
         resizeHandle=control("◢",v->{});resizeHandle.setContentDescription("拖动调整便签大小");resizeHandle.setOnTouchListener(new DragListener(true));footer.addView(resizeHandle);
         content.addView(footer,new LinearLayout.LayoutParams(-1,Ui.dp(context,40)));
         root.addView(content,new LinearLayout.LayoutParams(-1,0,1));
@@ -85,12 +86,12 @@ public final class FloatingNoteWindow {
         boolean sizeChanged=current.compact!=note.compact;
         current=note;
         root.setBackground(Ui.round(context,Ui.COLORS[note.color],16));root.setAlpha(note.opacity);
-        title.setText(note.displayTitle());body.setTextSize(note.fontSize);preview.setTextSize(note.fontSize);
+        title.setText(note.displayTitle());body.setTextSize(note.fontSize);
         if(!body.getText().toString().equals(note.content)){
             binding=true;int cursor=body.getSelectionStart();body.setText(note.content);
             if(editing)body.setSelection(Math.max(0,Math.min(cursor,body.length())));binding=false;
         }
-        if(previewing)preview.setText(Markdown.render(note.content));
+        if(previewing)preview.render(note);
         content.setVisibility(note.compact?View.GONE:View.VISIBLE);
         editButton.setVisibility(note.compact?View.GONE:View.VISIBLE);
         if(sizeChanged){fitScreen();}
@@ -99,7 +100,7 @@ public final class FloatingNoteWindow {
     private void updateContentMode(){
         body.setVisibility(previewing?View.GONE:View.VISIBLE);
         previewScroll.setVisibility(previewing?View.VISIBLE:View.GONE);
-        if(previewing)preview.setText(Markdown.render(body.getText().toString()));
+        if(previewing)preview.render(current);
     }
     private void setEditing(boolean value){
         if(!attached)return;

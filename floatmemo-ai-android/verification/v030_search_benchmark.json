@@ -1,0 +1,36 @@
+{
+  "environment": "Linux x86_64, OpenJDK17 host; synthetic data only",
+  "phonePerformanceVerified": false,
+  "results": [
+    {
+      "candidates": 10,
+      "notes": 10,
+      "bodyChars": 6040,
+      "charsPerNote": 3014,
+      "indexBuildMs": 16.396206,
+      "firstPlanMs": 43.927622,
+      "serializedUserPayloadChars": 7756,
+      "actualHttpCalls": 0
+    },
+    {
+      "candidates": 10,
+      "notes": 100,
+      "bodyChars": 6040,
+      "charsPerNote": 3014,
+      "indexBuildMs": 20.907793,
+      "firstPlanMs": 16.892992,
+      "serializedUserPayloadChars": 7756,
+      "actualHttpCalls": 0
+    },
+    {
+      "candidates": 10,
+      "notes": 1000,
+      "bodyChars": 6040,
+      "charsPerNote": 3014,
+      "indexBuildMs": 25.780695,
+      "firstPlanMs": 20.558176,
+      "serializedUserPayloadChars": 7756,
+      "actualHttpCalls": 0
+    }
+  ]
+}

@@ -26,6 +26,11 @@ public final class AiDocument {
         if(text.isEmpty()||text.length()>1200||quote.isEmpty()||!raw.contains(quote))throw new Exception("要点缺少有效原文依据，请重试或检查原文");
         return new JSONObject().put("text",text).put("quote",quote).put("manual",false);
     }
+    public static boolean validQuotes(String json,String raw){
+        try{JSONObject j=new JSONObject(json);for(String key:new String[]{"summaries","points","examples","advice"}){JSONArray a=j.optJSONArray(key);if(a!=null)for(int i=0;i<a.length();i++)if(NoteBodyParser.locate(raw,a.getJSONObject(i).getString("quote"))<0)return false;}return true;}catch(Exception e){return false;}
+    }
+    public static boolean current(Note n){return !n.aiJson.isEmpty()&&!n.aiSourceHash.isEmpty()&&n.aiSourceHash.equals(NoteBodyParser.fingerprint(n))&&validQuotes(n.aiJson,n.content);}
+    public static void migrateFingerprint(Note n){if(n.aiSourceHash.isEmpty()&&n.aiRevision==n.revision&&!n.aiJson.isEmpty()&&validQuotes(n.aiJson,n.content))n.aiSourceHash=NoteBodyParser.fingerprint(n);}
     public static List<String> chunks(String text){
         List<String> result=new ArrayList<>();int start=0;
         while(start<text.length()){int end=Math.min(start+10000,text.length());

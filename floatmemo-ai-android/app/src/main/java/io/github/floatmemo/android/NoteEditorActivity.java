@@ -12,11 +12,14 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class NoteEditorActivity extends BaseActivity {
+public final class NoteEditorActivity extends BaseActivity implements NoteRepository.Listener {
     private NoteRepository repo;
     private String id;
     private EditText title, body;
-    private TextView preview, folderLabel, opacityLabel;
+    private TextView folderLabel, opacityLabel;
+    private NotePreviewRenderer preview;
+    private int insertAt;private long insertRevision;private boolean importingImage;
+    private static final int PICK_IMAGES=44;
     private ScrollView previewScroll;
     private boolean binding, previewing;
     private String exportType = "md";
@@ -26,7 +29,7 @@ public final class NoteEditorActivity extends BaseActivity {
     @Override public void onCreate(Bundle state){
         super.onCreate(state);repo=NoteRepository.get(this);id=getIntent().getStringExtra("noteId");
         if(repo.find(id)==null){finish();return;}
-        if(state!=null){exportType=state.getString("exportType","md");previewing=state.getBoolean("preview",false);}
+        if(state!=null){exportType=state.getString("exportType","md");previewing=state.getBoolean("preview",false);insertAt=state.getInt("insertAt",0);insertRevision=state.getLong("insertRevision",0);}
         root=Ui.column(this);Ui.insetActivity(this,root,16);
         LinearLayout bar=Ui.row(this);
         bar.addView(Ui.button(this,"‹ 返回",false,v->finish()));
@@ -39,14 +42,15 @@ public final class NoteEditorActivity extends BaseActivity {
         LinearLayout toolbar=Ui.row(this);
         toolbar.addView(Ui.button(this,"编辑 / 预览",false,v->{previewing=!previewing;updateMode();}));
         toolbar.addView(Ui.button(this,"外观",false,v->appearancePanel.setVisibility(appearancePanel.getVisibility()==View.VISIBLE?View.GONE:View.VISIBLE)));
+        toolbar.addView(Ui.button(this,"插图",false,v->pickImages()));
         TextView spacer=Ui.text(this,"",12,Ui.MUTED);toolbar.addView(spacer,new LinearLayout.LayoutParams(0,1,1));
-        toolbar.addView(Ui.button(this,"更多",false,v->more()));root.addView(toolbar);Ui.space(root,10);
+        toolbar.addView(Ui.button(this,"更多",false,v->more()));HorizontalScrollView toolbarScroll=new HorizontalScrollView(this);toolbarScroll.setHorizontalScrollBarEnabled(false);toolbarScroll.addView(toolbar);root.addView(toolbarScroll);Ui.space(root,10);
         body=Ui.input(this,"写点什么…\n\n支持 Markdown 标题、列表、粗体和代码块。");
         body.setGravity(Gravity.TOP|Gravity.START);
         body.setInputType(android.text.InputType.TYPE_CLASS_TEXT|android.text.InputType.TYPE_TEXT_FLAG_MULTI_LINE|android.text.InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
         body.setHorizontallyScrolling(false);
         root.addView(body,new LinearLayout.LayoutParams(-1,0,1));
-        previewScroll=new ScrollView(this);preview=Ui.text(this,"",16,Ui.INK);preview.setTextIsSelectable(true);
+        previewScroll=new ScrollView(this);preview=new NotePreviewRenderer(this);
         preview.setPadding(Ui.dp(this,16),Ui.dp(this,16),Ui.dp(this,16),Ui.dp(this,16));
         previewScroll.addView(preview);root.addView(previewScroll,new LinearLayout.LayoutParams(-1,0,1));
         Ui.space(root,10);
@@ -77,21 +81,24 @@ public final class NoteEditorActivity extends BaseActivity {
         body.addTextChangedListener(new MainActivity.Watcher(){public void afterTextChanged(Editable e){if(!binding)repo.update(id,n->n.content=e.toString());}});
         load();
         String quote=getIntent().getStringExtra("sourceQuote");
-        if(quote!=null&&!quote.isEmpty()){int at=body.getText().toString().indexOf(quote);if(at>=0){previewing=false;updateMode();body.requestFocus();body.setSelection(at,at+quote.length());}}
+        if(quote!=null&&!quote.isEmpty()){int at=getIntent().getIntExtra("sourceStart",-1);String raw=body.getText().toString();if(at<0||!raw.startsWith(quote,at))at=NoteBodyParser.locate(raw,quote);if(at>=0){previewing=false;updateMode();body.requestFocus();body.setSelection(at,at+quote.length());}}
     }
+    @Override protected void onStart(){super.onStart();repo.observe(this);}
+    @Override protected void onStop(){repo.removeObserver(this);super.onStop();}
+    @Override public void onNotesChanged(){if(!isFinishing())load();}
     @Override protected void onResume(){super.onResume();if(body!=null)load();}
     @Override protected void onPause(){repo.flush();super.onPause();}
-    @Override protected void onSaveInstanceState(Bundle out){super.onSaveInstanceState(out);out.putString("exportType",exportType);out.putBoolean("preview",previewing);}
+    @Override protected void onSaveInstanceState(Bundle out){super.onSaveInstanceState(out);out.putString("exportType",exportType);out.putBoolean("preview",previewing);out.putInt("insertAt",insertAt);out.putLong("insertRevision",insertRevision);}
     private void load(){
         Note n=repo.find(id);if(n==null){finish();return;}
         binding=true;
         if(!title.getText().toString().equals(n.title))title.setText(n.title);
-        if(!body.getText().toString().equals(n.content))body.setText(n.content);
+        if(!body.getText().toString().equals(n.content)){int cursor=body.getSelectionStart();body.setText(n.content);body.setSelection(Math.max(0,Math.min(cursor,n.content.length())));}
         binding=false;applyAppearance();updateMode();
     }
     private void applyAppearance(){
         Note n=repo.find(id);if(n==null)return;
-        body.setTextSize(n.fontSize);preview.setTextSize(n.fontSize);
+        body.setTextSize(n.fontSize);
         body.setBackground(Ui.round(this,Ui.COLORS[n.color],16));previewScroll.setBackground(Ui.round(this,Ui.COLORS[n.color],16));
         folderLabel.setText(getString(R.string.folder_name,n.folder.isEmpty()?"未分类":n.folder));
         opacityLabel.setText(getString(R.string.overlay_opacity,Math.round(n.opacity*100)));
@@ -99,7 +106,7 @@ public final class NoteEditorActivity extends BaseActivity {
     private void updateMode(){
         body.setVisibility(previewing?View.GONE:View.VISIBLE);previewScroll.setVisibility(previewing?View.VISIBLE:View.GONE);
         if(previewing){
-            preview.setText(Markdown.render(body.getText().toString()));
+            Note note=repo.find(id);if(note!=null)preview.render(note);
             ((android.view.inputmethod.InputMethodManager)getSystemService(INPUT_METHOD_SERVICE)).hideSoftInputFromWindow(body.getWindowToken(),0);
         }
     }
@@ -128,13 +135,32 @@ public final class NoteEditorActivity extends BaseActivity {
     }
     @Override protected void onActivityResult(int request,int result,Intent data){
         super.onActivityResult(request,result,data);
+        if(request==PICK_IMAGES&&result==RESULT_OK&&data!=null){receiveImages(data);return;}
         if(request==42&&result==RESULT_OK&&data!=null&&data.getData()!=null){
             Note n=repo.find(id);if(n==null)return;
             String content=exportType.equals("md")&&!n.title.isEmpty()?"# "+n.title+"\n\n"+n.content:n.content;
             try(OutputStream output=getContentResolver().openOutputStream(data.getData())){
                 if(output==null)throw new java.io.IOException("No output stream");
-                output.write(content.getBytes(StandardCharsets.UTF_8));Toast.makeText(this,"已导出",Toast.LENGTH_SHORT).show();
+                output.write(content.getBytes(StandardCharsets.UTF_8));Toast.makeText(this,"已导出文字；图片请用首页的完整ZIP备份保存",Toast.LENGTH_LONG).show();
             }catch(Exception e){Toast.makeText(this,"导出失败，请重试",Toast.LENGTH_LONG).show();}
         }
+    }
+    private void pickImages(){
+        if(importingImage){Toast.makeText(this,"图片正在保存，请稍候",Toast.LENGTH_SHORT).show();return;}
+        Note n=repo.find(id);if(n==null)return;insertAt=Math.max(0,body.getSelectionStart());insertRevision=n.revision;
+        startActivityForResult(new Intent(Intent.ACTION_OPEN_DOCUMENT).addCategory(Intent.CATEGORY_OPENABLE).setType("image/*").putExtra(Intent.EXTRA_ALLOW_MULTIPLE,true).putExtra(Intent.EXTRA_MIME_TYPES,new String[]{"image/jpeg","image/png","image/webp"}),PICK_IMAGES);
+    }
+    private void receiveImages(Intent data){
+        List<android.net.Uri> selected=new ArrayList<>();if(data.getClipData()!=null){for(int i=0;i<data.getClipData().getItemCount();i++)selected.add(data.getClipData().getItemAt(i).getUri());}else if(data.getData()!=null)selected.add(data.getData());
+        if(selected.isEmpty())return;Note before=repo.find(id);if(before==null)return;
+        if(selected.size()+NoteBodyParser.ids(before.content).size()>20){Toast.makeText(this,"每篇最多20张图片，请减少选择",Toast.LENGTH_LONG).show();return;}
+        final int at=insertAt;final long rev=insertRevision;importingImage=true;Toast.makeText(this,"正在复制图片到本机…",Toast.LENGTH_SHORT).show();
+        android.content.Context app=getApplicationContext();NotePreviewRenderer.IMAGES.execute(()->{
+            AttachmentStore storage=new AttachmentStore(app);List<Attachment> copied=new ArrayList<>();boolean saved=false;
+            try{long bytes=0;for(Attachment a:NoteBodyParser.referenced(before))bytes+=a.bytes;for(android.net.Uri uri:selected){Attachment a=storage.copy(uri);copied.add(a);bytes+=a.bytes;if(bytes>Attachment.MAX_NOTE_BYTES)throw new Exception("每篇原图合计最多100MiB");}
+                repo.insertAttachments(id,rev,at,copied);saved=true;runOnUiThread(()->{importingImage=false;if(!isDestroyed()&&!isFinishing()){load();previewing=true;updateMode();Toast.makeText(this,"已保存原图副本。图片不会上传给AI",Toast.LENGTH_LONG).show();}});
+            }catch(Exception e){runOnUiThread(()->{importingImage=false;if(!isDestroyed())Toast.makeText(this,"插图未完成："+(e.getMessage()==null?"请重试":e.getMessage()),Toast.LENGTH_LONG).show();});}
+            finally{if(!saved)for(Attachment a:copied)storage.file(a.id).delete();}
+        });
     }
 }

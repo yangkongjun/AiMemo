@@ -21,11 +21,14 @@ public final class Note {
     public String tags = "", dismissedRelations = "";
     public boolean folderLocked = false, tagsLocked = false, aiLocked = false, reviewed = false;
     public int attempts = 0;
+    public String aiSourceHash="";
+    public long aiGeneration=0;
+    public java.util.List<Attachment> attachments=new java.util.ArrayList<>();
 
     public String displayTitle() {
         String value = title.trim();
-        if (value.isEmpty()) value = content.trim().split("\n", 2)[0];
-        if (value.isEmpty()) return "新便签";
+        if (value.isEmpty()) value = NoteBodyParser.text(content).trim().split("\n", 2)[0];
+        if (value.isEmpty()) return NoteBodyParser.ids(content).isEmpty()?"新便签":"图片笔记";
         int count = value.codePointCount(0, value.length());
         return count > 28 ? value.substring(0, value.offsetByCodePoints(0, 28)) + "…" : value;
     }
@@ -40,11 +43,13 @@ public final class Note {
         n.aiStatus=aiStatus; n.aiError=aiError; n.topicSuggestion=topicSuggestion; n.tags=tags;
         n.folderLocked=folderLocked; n.tagsLocked=tagsLocked; n.aiLocked=aiLocked;
         n.reviewed=reviewed; n.attempts=attempts;n.dismissedRelations=dismissedRelations;
+        n.aiSourceHash=aiSourceHash;n.aiGeneration=aiGeneration;n.attachments=new java.util.ArrayList<>(attachments);
         return n;
     }
 
     public JSONObject toJson() throws JSONException {
-        return new JSONObject().put("id", id).put("title", title).put("content", content)
+        org.json.JSONArray assets=new org.json.JSONArray();for(Attachment a:attachments)assets.put(a.toJson());
+        return new JSONObject().put("attachments",assets).put("aiSourceHash",aiSourceHash).put("aiGeneration",aiGeneration).put("id", id).put("title", title).put("content", content)
             .put("folder", folder).put("color", color).put("opacity", opacity)
             .put("fontSize", fontSize).put("x", x).put("y", y).put("width", width)
             .put("height", height).put("open", open).put("compact", compact)
@@ -76,6 +81,8 @@ public final class Note {
         n.folderLocked=j.optBoolean("folderLocked",false);n.tagsLocked=j.optBoolean("tagsLocked",false);
         n.aiLocked=j.optBoolean("aiLocked",false);n.reviewed=j.optBoolean("reviewed",false);
         n.attempts=j.optInt("attempts",0);n.dismissedRelations=j.optString("dismissedRelations","");
+        n.aiSourceHash=j.optString("aiSourceHash","");n.aiGeneration=Math.max(0,j.optLong("aiGeneration",0));
+        org.json.JSONArray assets=j.optJSONArray("attachments");if(assets!=null)for(int i=0;i<assets.length();i++)try{n.attachments.add(Attachment.fromJson(assets.getJSONObject(i)));}catch(Exception e){throw new IllegalArgumentException("笔记附件信息损坏",e);}
         return n;
     }
 }

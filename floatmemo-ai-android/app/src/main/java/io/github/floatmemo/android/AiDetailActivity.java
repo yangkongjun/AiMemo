@@ -18,7 +18,7 @@ public final class AiDetailActivity extends BaseActivity implements NoteReposito
     private void render(){Note n=repo.find(id);if(n==null){finish();return;}root.removeAllViews();
         LinearLayout bar=Ui.row(this);bar.addView(Ui.button(this,"‹ 返回",false,v->finish()));TextView gap=Ui.text(this,"",12,Ui.MUTED);bar.addView(gap,new LinearLayout.LayoutParams(0,1,1));bar.addView(Ui.button(this,"编辑原文",false,v->edit("")));bar.addView(Ui.button(this,"悬浮",true,v->requestOverlay(OverlayService.SHOW,id)));root.addView(bar);Ui.space(root,16);
         root.addView(Ui.bold(this,n.displayTitle(),25,Ui.INK));Ui.space(root,6);
-        String status=n.aiStatus+(n.aiRevision>0&&n.aiRevision!=n.revision?" · 原文已改变，以下是旧版本整理":"");root.addView(Ui.text(this,status,14,Ui.GREEN));if(!repo.error.isEmpty())root.addView(Ui.text(this,repo.error,14,Ui.MUTED));
+        String status=n.aiStatus+(n.aiRevision>0&&!AiDocument.current(n)?" · 原文已改变，以下是旧版本整理":"");root.addView(Ui.text(this,status,14,Ui.GREEN));if(!repo.error.isEmpty())root.addView(Ui.text(this,repo.error,14,Ui.MUTED));
         if(!n.aiError.isEmpty()){root.addView(Ui.text(this,n.aiError,14,Ui.MUTED));root.addView(Ui.button(this,"查看诊断记录",false,v->startActivity(new Intent(this,DiagnosticActivity.class))));}Ui.space(root,12);
         LinearLayout actions=Ui.row(this);actions.addView(Ui.button(this,n.aiJson.isEmpty()?"AI 整理":"重新整理",true,v->analyze(n)));
         actions.addView(Ui.button(this,n.reviewed?"已确认":"确认整理",false,v->{repo.update(id,x->{x.reviewed=true;x.aiStatus="已确认";});}));
@@ -33,7 +33,7 @@ public final class AiDetailActivity extends BaseActivity implements NoteReposito
                 for(int i=0;i<a.length();i++){JSONObject item=a.getJSONObject(i);String text=item.getString("text"),quote=item.getString("quote");final int index=i;String key=section[0];
                     LinearLayout card=Ui.column(this);int pad=Ui.dp(this,12);card.setPadding(pad,pad,pad,pad);card.setBackground(Ui.round(this,0xFFFFFFFF,12));
                     TextView value=Ui.text(this,text+(item.optBoolean("manual")?"\n〔人工修正〕":""),16,Ui.INK);value.setTextIsSelectable(true);card.addView(value);
-                    LinearLayout tools=Ui.row(this);tools.addView(Ui.button(this,"原文依据",false,v->source(quote,n.aiRevision==n.revision)));tools.addView(Ui.button(this,"纠正这条",false,v->correct(n,key,index,item)));card.addView(tools);root.addView(card);Ui.space(root,8);
+                    LinearLayout tools=Ui.row(this);tools.addView(Ui.button(this,"原文依据",false,v->source(quote,AiDocument.current(n))));tools.addView(Ui.button(this,"纠正这条",false,v->correct(n,key,index,item)));card.addView(tools);root.addView(card);Ui.space(root,8);
                 }Ui.space(root,12);
             }
             JSONArray q=j.optJSONArray("questions");if(q!=null&&q.length()>0){root.addView(Ui.bold(this,"可以补充的背景",18,Ui.INK));for(int i=0;i<q.length();i++)root.addView(Ui.text(this,"• "+q.getString(i),15,Ui.MUTED));root.addView(Ui.button(this,"回原文补充",false,v->edit("")));}
@@ -50,7 +50,7 @@ public final class AiDetailActivity extends BaseActivity implements NoteReposito
         else {repo.queue(id,false);toast("已加入后台整理，网络可用时处理");}}
     private void edit(String quote){startActivity(new Intent(this,NoteEditorActivity.class).putExtra("noteId",id).putExtra("sourceQuote",quote));}
     private void source(String quote,boolean current){new AlertDialog.Builder(this).setTitle(current?"原文依据":"整理时的原文依据 旧版本").setMessage(quote).setNegativeButton("关闭",null).setPositiveButton(current?"定位原文":"查看当前原文",(d,w)->edit(current?quote:"")).show();}
-    private void correct(Note n,String key,int index,JSONObject item){if(n.aiRevision!=n.revision){toast("原文已更新，请先重新整理再纠正");return;}EditText text=Ui.input(this,"按你的意思修改这条要点");text.setText(item.optString("text"));text.setMinLines(3);
+    private void correct(Note n,String key,int index,JSONObject item){if(!AiDocument.current(n)){toast("原文已更新，请先重新整理再纠正");return;}EditText text=Ui.input(this,"按你的意思修改这条要点");text.setText(item.optString("text"));text.setMinLines(3);
         new AlertDialog.Builder(this).setTitle("纠正这条内容").setView(text).setNegativeButton("取消",null).setNeutralButton("移除这条",(d,w)->{try{JSONObject j=new JSONObject(n.aiJson);j.getJSONArray(key).remove(index);repo.editAi(id,n.revision,j.toString());}catch(Exception e){toast("纠正未保存，原文可能已改变，请刷新后重试");}})
             .setPositiveButton("保存并锁定",(d,w)->{String value=text.getText().toString().trim();if(value.isEmpty()){toast("内容不能为空");return;}try{JSONObject j=new JSONObject(n.aiJson);j.getJSONArray(key).getJSONObject(index).put("text",value).put("manual",true);repo.editAi(id,n.revision,j.toString());}catch(Exception e){toast("纠正未保存，原文可能已改变，请刷新后重试");}}).show();}
     private void folder(Note n){EditText text=Ui.input(this,"主题名称，留空设为未分类");text.setText(n.topicSuggestion.isEmpty()?n.folder:n.topicSuggestion);

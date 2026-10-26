@@ -3,8 +3,8 @@
     <string name="memo_count">%1$d 张便签</string>
     <string name="folder_name">%1$s ▾</string>
     <string name="overlay_opacity">悬浮透明度 %1$d%%</string>
-    <string name="ai_search_running">AI 正在检查 %1$d 条候选笔记的前1400字符；原文保留在本机</string>
-    <string name="ai_search_finished">AI 按意思查找 · 已检查 %1$d / %2$d 条，每条最多1400字符%3$s</string>
+    <string name="ai_search_running">AI 正在检查 %1$d 条候选的命中片段；原文保留在本机</string>
+    <string name="ai_search_finished">AI 按意思查找 · 已检查 %1$d / %2$d 条候选的预算内片段%3$s</string>
     <string name="ai_search_empty"> · 未找到，可补充线索</string>
     <string name="ai_search_failed">AI 查找未完成，当前展示本地文字结果</string>
     <string name="ai_consent">我已了解发送范围，启用 AI 自动整理与查找</string>

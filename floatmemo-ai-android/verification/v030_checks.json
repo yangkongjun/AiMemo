@@ -1,0 +1,27 @@
+{
+  "date": "2026-10-27",
+  "versionName": "0.3.0-ai-preview",
+  "versionCode": 9,
+  "package": "io.github.floatmemo.android",
+  "apk_sha256": "5565d979a1e1e403bba801149ada50602850629cc669c5cbcc18829b3dcf88d2",
+  "apk_bytes": 115240,
+  "certificate_sha256": "48c18d24b9bbe983674249919f73fc31fd29dfa55de23529c1f17f94136b3cd1",
+  "apk_v2": true,
+  "apk_v3": true,
+  "structure": {
+    "resources_uncompressed": true,
+    "resources_data_offset": 2672,
+    "resources_alignment": 4,
+    "zip_crc_valid": true
+  },
+  "jvm_tests_passed": 105,
+  "jvm_tests_failed": 0,
+  "built_with": "JDK17, AAPT2, ECJ, D8, zipalign, apksigner; retained signing key; passwords from environment",
+  "not_run": [
+    "Android真机/模拟器安装和交互",
+    "实际SQLite+文件故障注入及进程强杀恢复",
+    "真实模型服务与API Key联调",
+    "Gradle lint"
+  ],
+  "scope_of_jvm_checks": "片段预算/来源映射、文本指纹/锁定/任务代次、搜索准入及缓存、ZIP/hash/路径/CRC、冲突ID和文件事务恢复记录；不等于实际Android数据库事务已故障注入验收"
+}

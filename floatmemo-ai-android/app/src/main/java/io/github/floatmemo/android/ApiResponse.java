@@ -39,7 +39,7 @@ public final class ApiResponse {
         JSONObject choice=choices.optJSONObject(0);
         if(choice==null)throw new Failure("INVALID_CHOICE","choices 中的回答格式无效，请查看诊断记录");
         boolean truncated="length".equals(choice.optString("finish_reason"));
-        if(truncated&&!connectionTest)throw new Failure("OUTPUT_TRUNCATED","生成达到本次输出上限，结果未完成。可先缩短笔记再试，并查看诊断记录中的上限与用量");
+        if(truncated&&!connectionTest)throw new Failure("OUTPUT_TRUNCATED","输出被截断，可能达到生成上限或模型总上下文限制。原文保留；可在AI设置调整生成上限，核对模型容量或缩短内容后手动重试，并查看诊断用量");
         JSONObject message=choice.optJSONObject("message");
         Object content=message==null?null:message.opt("content");
         // A short probe only checks inference connectivity; reasoning may consume its budget

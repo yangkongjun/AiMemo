@@ -14,6 +14,7 @@
         android:label="FloatMemo AI"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <activity android:name=".ImageViewerActivity" android:exported="false" />
         <activity android:name=".AiDetailActivity" android:exported="false" />
         <activity android:name=".DiagnosticActivity" android:exported="false" />
         <activity android:name=".AiSettingsActivity" android:exported="false" android:windowSoftInputMode="adjustResize" />
