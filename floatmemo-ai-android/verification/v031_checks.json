@@ -1,0 +1,27 @@
+{
+  "date": "2026-10-27",
+  "versionName": "0.3.1-ai-preview",
+  "versionCode": 10,
+  "package": "io.github.floatmemo.android",
+  "apk_sha256": "7339b25a61d9c75899cf3a1235a2bfd0e9b3303424fe3d373af90e42079107b3",
+  "apk_bytes": 119336,
+  "certificate_sha256": "48c18d24b9bbe983674249919f73fc31fd29dfa55de23529c1f17f94136b3cd1",
+  "apk_v2": true,
+  "apk_v3": true,
+  "structure": {
+    "resources_uncompressed": true,
+    "resources_data_offset": 2672,
+    "resources_alignment": 4,
+    "zip_crc_valid": true
+  },
+  "jvm_tests_passed": 133,
+  "jvm_tests_failed": 0,
+  "loopback_http_test": "Synthetic localhost HTTP; one POST; data chunks 100ms apart; 1000ms per-read timeout; total response >1000ms completes. Not Android, HTTPS or ModelScope integration.",
+  "not_run": [
+    "真机/模拟器安装及交互",
+    "真实模型长请求与网关联调",
+    "实际74秒断连的复现与根因验证",
+    "Gradle lint"
+  ],
+  "private_data": "Tests and loopback use synthetic values only; no real keys, notes, private diagnostics or reasoning content committed."
+}

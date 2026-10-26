@@ -1,3 +1,7 @@
+# V0.3.1接收层更新
+
+当前版本0.3.1-ai-preview、versionCode 10。新流式开关默认开启，保留原token及连接配置；短测试仍普通接收。ResponseReader有界读取当前HTTP响应，NetworkTrace记录白名单网络特征。完整结果仍走原文、锁定、代次和epoch保护，不自动重连/补发。不声称已定位或修复用户真实服务约74秒断连，细节见[交付说明](releases/V0_3_1.md)。
+
 # 后续开发交接（V0.3.0）
 
 用户已批准并开发了生成预算配置、本机图文笔记/完整备份和带预算的命中片段搜索。当前版本0.3.0-ai-preview、versionCode 9；包名和原证书延续。新增操作与代码入口见[开发补充](developer/V0_3_0_Usage_And_Development.md)，验证及未测项目见[交付记录](releases/V0_3_0.md)。每次交付继续同步floatmemo-ai分支，不自动合并main，不上传笔记/密钥/私钥。

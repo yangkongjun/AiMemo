@@ -48,6 +48,7 @@ public final class AiClient {
     private static <T> T chat(Context c,String system,String text,long epoch,String operation,int maxTokens,RequestOptions options,boolean connectionTest,ContentCheck<T> check)throws Exception{
         DiagnosticRecord record=new DiagnosticRecord(operation);DiagnosticStore.environment(c,record);
         String key="",body="";HttpURLConnection conn=null;String stage="配置检查";int status=-1;boolean logged=false;
+        ResponseReader.Stats responseStats=new ResponseReader.Stats();long waitingSince=-1;boolean traceWritten=false;
         try{
             AiConfig a=AiConfig.get(c);AiConfig.Snapshot snapshot=a.snapshot();
             if(!snapshot.enabled||snapshot.epoch!=epoch)throw new ApiResponse.Failure("CONFIG_CHANGED","AI 未启用或设置已改变，请保存并启用后重试");
@@ -60,21 +61,26 @@ public final class AiClient {
             record.put("正文和消息字符数",system.length()+text.length());
             if(operation.equals("AI 查找")){JSONObject input=new JSONObject(text);JSONArray notes=input.getJSONArray("notes");int chars=0,windowCount=0,fallbacks=0;for(int i=0;i<notes.length();i++){if(notes.getJSONObject(i).optBoolean("fallback"))fallbacks++;JSONArray windows=notes.getJSONObject(i).getJSONArray("windows");windowCount+=windows.length();for(int j=0;j<windows.length();j++)chars+=windows.getJSONObject(j).getString("text").length();}record.put("搜索候选数",notes.length());record.put("正文摘录字符数",chars);record.put("正文摘录预算",options.searchChars);record.put("摘录片段数",windowCount);record.put("回退开头的候选数",fallbacks);}
             if(key.isEmpty())throw new ApiResponse.Failure("KEY_MISSING","请先配置 API Key");
-            JSONObject request=new JSONObject().put("model",snapshot.model).put("stream",false).put("max_tokens",maxTokens)
+            boolean requestStream=!connectionTest&&options.streaming;record.put("请求流式接收",requestStream);record.put("请求数据已写出",false);record.put("已取得HTTP响应头",false);
+            JSONObject request=new JSONObject().put("model",snapshot.model).put("stream",requestStream).put("max_tokens",maxTokens)
                 .put("messages",new JSONArray().put(new JSONObject().put("role","system").put("content",system)).put(new JSONObject().put("role","user").put("content",text)));
             record.put("完整请求字符数",request.toString().length());
             if(!a.enabled()||a.epoch()!=epoch)throw new ApiResponse.Failure("CONFIG_CHANGED","AI 已暂停");
             stage="请求额度检查";record.stage(stage);AiConfig.reserve(c);
             stage="连接与发送";record.stage(stage);conn=(HttpURLConnection)new URL(endpoint).openConnection();
             conn.setRequestMethod("POST");conn.setInstanceFollowRedirects(false);conn.setConnectTimeout(12000);conn.setReadTimeout(options.readSeconds*1000);conn.setDoOutput(true);
+            byte[] requestBytes=request.toString().getBytes(StandardCharsets.UTF_8);conn.setFixedLengthStreamingMode(requestBytes.length);
+            conn.setRequestProperty("Accept",requestStream?"text/event-stream, application/json":"application/json");
             conn.setRequestProperty("Authorization","Bearer "+key);conn.setRequestProperty("Content-Type","application/json; charset=utf-8");
             if(!a.enabled()||a.epoch()!=epoch)throw new ApiResponse.Failure("CONFIG_CHANGED","AI 已暂停");
-            try(OutputStream out=conn.getOutputStream()){out.write(request.toString().getBytes(StandardCharsets.UTF_8));}
-            stage="等待 HTTP 响应";record.stage(stage);status=conn.getResponseCode();record.put("HTTP状态",status);
+            try(OutputStream out=conn.getOutputStream()){out.write(requestBytes);}
+            record.put("请求数据已写出",true);
+            stage="等待 HTTP 响应";record.stage(stage);waitingSince=System.nanoTime();status=conn.getResponseCode();record.put("HTTP状态",status);record.put("响应头等待毫秒",(System.nanoTime()-waitingSince)/1000000);record.put("已取得HTTP响应头",true);waitingSince=-1;
             record.put("响应类型",DiagnosticRecord.bounded(DiagnosticRecord.redact(conn.getContentType(),key),200));
             stage="读取响应";record.stage(stage);
             boolean ok=status>=200&&status<300;
-            body=readBody(status>=400?conn.getErrorStream():conn.getInputStream(),ok?2*1024*1024:16384,ok);
+            body=ok?ResponseReader.read(conn.getInputStream(),conn.getContentType(),responseStats):readBody(status>=400?conn.getErrorStream():conn.getInputStream(),16384,false);
+            responseStats.record(record);traceWritten=true;
             if(!a.enabled()||a.epoch()!=epoch)throw new ApiResponse.Failure("CONFIG_CHANGED","AI 设置已改变，本次结果已丢弃");
             stage="接口返回格式";record.stage(stage);
             try{JSONObject response=new JSONObject(body),usage=response.optJSONObject("usage");
@@ -99,9 +105,14 @@ public final class AiClient {
             else if(e instanceof javax.net.ssl.SSLException){code="TLS";hint="HTTPS 证书或握手失败：检查手机时间、证书链或代理环境";}
             else if(e instanceof java.net.SocketTimeoutException){code="TIMEOUT";hint="AI 请求超时：结合失败阶段检查网络或服务响应速度";}
             else if(e instanceof java.net.ConnectException){code="CONNECT";hint="连接被拒绝或无法建立：检查网络、端口和服务状态";}
+            else if(e instanceof ResponseReader.WireLimit){code="RESPONSE_TOO_LARGE";hint=e.getMessage();}
+            else if(e instanceof java.net.SocketException){code="NETWORK_SOCKET";hint="连接在传输完成前报错（"+NetworkTrace.signature(e)+"），请查看是否收到HTTP响应头及流式片段；不能仅凭此判定手机或服务端故障";}
+            else if(e instanceof java.io.EOFException){code="NETWORK_EOF";hint="连接在完整回答到达前结束；请查看HTTP响应头和流式片段计数";}
             else if(e instanceof java.io.IOException){code="NETWORK_IO";hint="网络读写失败：检查网络、代理或连接中断";}
             else{code="APP_PROCESSING";hint="应用处理响应时出错，请查看失败阶段";}
-            record.put("异常类别",e.getClass().getSimpleName());
+            record.put("异常类别",e.getClass().getSimpleName());record.put("异常原因类型链",NetworkTrace.causes(e));record.put("网络异常特征",NetworkTrace.signature(e));
+            if(waitingSince>=0)record.put("等待HTTP响应累计毫秒",(System.nanoTime()-waitingSince)/1000000);
+            responseStats.serviceCode=DiagnosticRecord.redact(responseStats.serviceCode,key,system,text);if(!traceWritten)responseStats.record(record);
             record.end(false,code,hint);
             if(!body.isEmpty())record.put("服务响应片段",DiagnosticRecord.responsePreview(body,key,system,text));
             logged=DiagnosticStore.append(c,record);

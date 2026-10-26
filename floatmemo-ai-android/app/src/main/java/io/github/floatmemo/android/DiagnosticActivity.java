@@ -18,7 +18,7 @@ public final class DiagnosticActivity extends BaseActivity {
         LinearLayout root=Ui.column(this);Ui.insetActivity(this,root,16);
         root.addView(Ui.button(this,"‹ 返回",false,v->finish()));Ui.space(root,12);
         root.addView(Ui.bold(this,"诊断记录",25,Ui.INK));Ui.space(root,8);
-        root.addView(Ui.text(this,"测试使用已保存且启用的 AI 配置，只发送一条测试短消息，不发送笔记。会计入请求次数，服务商可能收费。未保存的设置不会用于测试。",13,Ui.MUTED));Ui.space(root,8);
+        root.addView(Ui.text(this,"测试使用已保存且启用的 AI 配置，只发送一条测试短消息，不发送笔记。会计入请求次数，服务商可能收费。测试使用普通接收，不代表长回答或流式也一定成功。未保存的设置不会用于测试。",13,Ui.MUTED));Ui.space(root,8);
         test=Ui.button(this,"测试当前已保存的配置",true,v->test());root.addView(test);Ui.space(root,6);
         LinearLayout actions=Ui.row(this);
         actions.addView(Ui.button(this,"刷新",false,v->refresh()));

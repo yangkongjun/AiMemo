@@ -26,7 +26,7 @@ public final class AiConfig {
     public RequestOptions options(){return snapshot().options;}
     public final class Snapshot {
         public final boolean enabled;public final long epoch;public final String endpoint,model;public final RequestOptions options;private final String encrypted;
-        private Snapshot(java.util.Map<String,?> values){enabled=Boolean.TRUE.equals(values.get("enabled"));epoch=values.get("epoch") instanceof Long?(Long)values.get("epoch"):0;endpoint=string(values,"endpoint");model=string(values,"model");encrypted=string(values,"key");options=new RequestOptions(number(values,"analyzeTokens",8192),number(values,"searchTokens",4096),number(values,"readSeconds",120),number(values,"candidates",10),number(values,"searchChars",12000));}
+        private Snapshot(java.util.Map<String,?> values){enabled=Boolean.TRUE.equals(values.get("enabled"));epoch=values.get("epoch") instanceof Long?(Long)values.get("epoch"):0;endpoint=string(values,"endpoint");model=string(values,"model");encrypted=string(values,"key");options=new RequestOptions(number(values,"analyzeTokens",8192),number(values,"searchTokens",4096),number(values,"readSeconds",120),number(values,"candidates",10),number(values,"searchChars",12000),!Boolean.FALSE.equals(values.get("streaming")));}
         public String key()throws Exception{return decrypt(encrypted);}
     }
     private static String string(java.util.Map<String,?> values,String key){Object v=values.get(key);return v instanceof String?(String)v:"";}
@@ -67,7 +67,7 @@ public final class AiConfig {
         if(enable&&newKey.isEmpty()&&key().isEmpty())throw new Exception("请填写 API Key");
         edit.putString("endpoint",e).putString("model",model.trim()).putInt("limit",Math.max(1,Math.min(500,limit)))
             .putInt("analyzeTokens",options.analyzeTokens).putInt("searchTokens",options.searchTokens).putInt("readSeconds",options.readSeconds)
-            .putInt("candidates",options.candidates).putInt("searchChars",options.searchChars).putBoolean("enabled",enable).putLong("epoch",epoch()+1);if(!edit.commit())throw new Exception("配置保存失败");
+            .putBoolean("streaming",options.streaming).putInt("candidates",options.candidates).putInt("searchChars",options.searchChars).putBoolean("enabled",enable).putLong("epoch",epoch()+1);if(!edit.commit())throw new Exception("配置保存失败");
     }
     public boolean disable(){return p.edit().putBoolean("enabled",false).putLong("epoch",epoch()+1).commit();}
     public boolean clear(){return p.edit().clear().putLong("epoch",epoch()+1).commit();}

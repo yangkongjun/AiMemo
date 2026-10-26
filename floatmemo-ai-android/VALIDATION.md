@@ -1,3 +1,22 @@
+# V0.3.1验证记录
+
+日期2026-10-27。包名io.github.floatmemo.android，版本0.3.1-ai-preview，versionCode 10。
+
+- 完整生产Java/资源编译、AAPT2/ECJ/D8、zipalign与原证书签名通过。
+- 133项JVM测试通过（原105项及28项接收/诊断测试），失败0。
+- 回环HTTP合成分段测试：只发送1次POST，持续分段到达时总耗时可超过单次读取超时；不涉及真实API、TLS或Android。
+- APK v2/v3、未压缩资源表、4字节对齐、ZIP CRC、必需文件和二进制清单检查通过。包名不变，版本代码提高，证书与V0.3.0一致；这只是覆盖升级的身份条件，未实际在设备安装。
+- 未验证：Android真机/模拟器、真实模型长请求、实际网关断连复现及唯一根因、Gradle lint。
+- 数据库和媒体存储代码未在本次修改；原笔记及旧设置沿用。短测试继续64 token非流式，不代表长回答或流式已通过服务验收。
+
+APK SHA256：`7339b25a61d9c75899cf3a1235a2bfd0e9b3303424fe3d373af90e42079107b3`，字节数119336。
+
+证书SHA256：`48c18d24b9bbe983674249919f73fc31fd29dfa55de23529c1f17f94136b3cd1`。
+
+机器记录见verification/v031_checks.json、verification/build-v031.log；[交付与限制](../docs/releases/V0_3_1.md)包含使用步骤与依据。旧V0.3.0验证记录保留如下。
+
+---
+
 # V0.3.0验证记录
 
 日期：2026-10-27。包名io.github.floatmemo.android，版本0.3.0-ai-preview，versionCode 9。
