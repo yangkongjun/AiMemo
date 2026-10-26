@@ -1,0 +1,182 @@
+{
+  "date": "2026-10-27",
+  "scope": "首次同步；应用代码未改；未构建新APK",
+  "baseline_app_version": "0.2.6-ai-preview",
+  "unchanged_source_config_files": 40,
+  "source_hashes": [
+    {
+      "path": "floatmemo-ai-android/app/src/main/AndroidManifest.xml",
+      "sha256": "1f19a4687218541a101a6f1bebb515067d730b1b2d23d5ba0b825e8f1c8b198c"
+    },
+    {
+      "path": "floatmemo-ai-android/app/src/main/java/io/github/floatmemo/android/ApiResponse.java",
+      "sha256": "fb1027f71d94e655425d160a239ea881c1358bbec2a166a12c36d2794e52d3c3"
+    },
+    {
+      "path": "floatmemo-ai-android/app/src/main/java/io/github/floatmemo/android/BaseActivity.java",
+      "sha256": "eedc8ef88a7541bff62adc2e7c4619350eb8e5bb5e4587056b0b2c38dea12cfb"
+    },
+    {
+      "path": "floatmemo-ai-android/app/src/main/java/io/github/floatmemo/android/AiJobService.java",
+      "sha256": "b1d73e6889b8165b17886907829f467e21d079be66fcd9eeddacba26a2ca8da1"
+    },
+    {
+      "path": "floatmemo-ai-android/app/src/main/java/io/github/floatmemo/android/FloatingNoteWindow.java",
+      "sha256": "8242836aedd2b6a2793e1e7b003b28e127eb3df9134e56ed88ffc8bc2a74eb3a"
+    },
+    {
+      "path": "floatmemo-ai-android/app/src/main/java/io/github/floatmemo/android/Markdown.java",
+      "sha256": "f45f0b39bf313716f83ffe9c0406f2c73c13b16846d126d04a55c5d3f2c4bc01"
+    },
+    {
+      "path": "floatmemo-ai-android/app/src/main/java/io/github/floatmemo/android/BrowseActivity.java",
+      "sha256": "8359763a9e7bfe82aaf7afd7fde20ea3604bb70e86365baf5e158a8c3aa6ae3f"
+    },
+    {
+      "path": "floatmemo-ai-android/app/src/main/java/io/github/floatmemo/android/DiagnosticStore.java",
+      "sha256": "b69026bb82234b4f948c4c9257ded55d50ba1782138d9eaad09e76f1fdfba5d3"
+    },
+    {
+      "path": "floatmemo-ai-android/app/src/main/java/io/github/floatmemo/android/Ui.java",
+      "sha256": "b0525767f38c084f918af973753ffac819e36219e44c1f0180f567dd6c68d7a7"
+    },
+    {
+      "path": "floatmemo-ai-android/app/src/main/java/io/github/floatmemo/android/AiClient.java",
+      "sha256": "2205748039ee74947656c05c21c4871ed78563deec3f6d1344780eb06c143642"
+    },
+    {
+      "path": "floatmemo-ai-android/app/src/main/java/io/github/floatmemo/android/Note.java",
+      "sha256": "38974a7ab6a353cdea805784821e44be350833556321ebcd2ee8ac71abaa754a"
+    },
+    {
+      "path": "floatmemo-ai-android/app/src/main/java/io/github/floatmemo/android/AiDocument.java",
+      "sha256": "14e65fac7f17a0753bd2ec309d18ac9251d3b4bd0e34912f9101675f2687741a"
+    },
+    {
+      "path": "floatmemo-ai-android/app/src/main/java/io/github/floatmemo/android/MainActivity.java",
+      "sha256": "8ced92a2f78a50ceceb5d1f553546508e66a017ff9ca0c8ebd5646d4147710d0"
+    },
+    {
+      "path": "floatmemo-ai-android/app/src/main/java/io/github/floatmemo/android/AiDetailActivity.java",
+      "sha256": "0a5706555246c41be5e77864034dee5ee9c79ac3826afb15b6a77163be65e8bb"
+    },
+    {
+      "path": "floatmemo-ai-android/app/src/main/java/io/github/floatmemo/android/WindowGeometry.java",
+      "sha256": "435677eadf291d7e0890f616c64d664e5ec3eaac173b909c96f879d61cf3b6e4"
+    },
+    {
+      "path": "floatmemo-ai-android/app/src/main/java/io/github/floatmemo/android/AiConfig.java",
+      "sha256": "f4d80ea5f2a2d247d2ce9274a8f5b0eb8867a42ee0d84644ae9be27e1b2b12ea"
+    },
+    {
+      "path": "floatmemo-ai-android/app/src/main/java/io/github/floatmemo/android/NoteEditorActivity.java",
+      "sha256": "b14ca8d17ee8df807da0d2f869a944284435a0c60899d2e5e4edc29e21448233"
+    },
+    {
+      "path": "floatmemo-ai-android/app/src/main/java/io/github/floatmemo/android/ResultGate.java",
+      "sha256": "1d158ab28b5de36bce053cb8d3819e37d3ffbe05db0e51a8313f2bdaee601e54"
+    },
+    {
+      "path": "floatmemo-ai-android/app/src/main/java/io/github/floatmemo/android/SearchEngine.java",
+      "sha256": "6e57346645b238fbf5fb0ac7d525d84133dcb0173fb08d7efe26435553c84671"
+    },
+    {
+      "path": "floatmemo-ai-android/app/src/main/java/io/github/floatmemo/android/DiagnosticRecord.java",
+      "sha256": "a1da8d7572c0417b0d1dfcbd22a6bd23521593a5cad5d0ea9274c1a56ad22e10"
+    },
+    {
+      "path": "floatmemo-ai-android/app/src/main/java/io/github/floatmemo/android/ImportPolicy.java",
+      "sha256": "8e1634461e79d3fca2f78f71f17cd9916323111f91272c4b9f5a90f1719b81a8"
+    },
+    {
+      "path": "floatmemo-ai-android/app/src/main/java/io/github/floatmemo/android/NoteRepository.java",
+      "sha256": "b566ccce5f400cb4e9a062a83703ae532a16a8c1f9845811561541b6641e082f"
+    },
+    {
+      "path": "floatmemo-ai-android/app/src/main/java/io/github/floatmemo/android/OverlayService.java",
+      "sha256": "6fe2d67aac5e9be7bdbf51cba6fbd1139e71e9ea669ac2e536fdb80a1ee38dc4"
+    },
+    {
+      "path": "floatmemo-ai-android/app/src/main/java/io/github/floatmemo/android/AiSettingsActivity.java",
+      "sha256": "fea753b783e903a051ed3070afcc52824a77447688aaee98c7e544cef9ab909a"
+    },
+    {
+      "path": "floatmemo-ai-android/app/src/main/java/io/github/floatmemo/android/DiagnosticActivity.java",
+      "sha256": "6ffcbdcfa39fc71ed83bd2898b1309e6850f29e558c8bf9509c568ff4f800a2e"
+    },
+    {
+      "path": "floatmemo-ai-android/app/src/main/res/values/styles.xml",
+      "sha256": "a55b1b062452e9c2c583acbbff77ef359b37801068099882b1437c2d17746a3c"
+    },
+    {
+      "path": "floatmemo-ai-android/app/src/main/res/values/strings.xml",
+      "sha256": "5bcf330d857ebf11f3f0b41aefea77f36776cf52efe0da99b59bc6e4d58fdb32"
+    },
+    {
+      "path": "floatmemo-ai-android/app/src/main/res/xml/data_extraction_rules.xml",
+      "sha256": "eda9dddce1e895de1efd716fe75e244187bf8f91a3bb7444c6ea1731e51c74a8"
+    },
+    {
+      "path": "floatmemo-ai-android/app/src/main/res/values-v27/styles.xml",
+      "sha256": "a99ef65fce428f1291902587c4e5814aa9b22addfdf44d85ca3ef6503f19034a"
+    },
+    {
+      "path": "floatmemo-ai-android/app/src/main/res/drawable/ic_note.xml",
+      "sha256": "228e7929ac6c990bed43cc59661cace7481692e89ac9ab9dc2a1857021b35fb5"
+    },
+    {
+      "path": "floatmemo-ai-android/app/src/test/java/io/github/floatmemo/android/SearchEngineTest.java",
+      "sha256": "007038b1b80a13509dcbef6e9696da671455747a2344cef3cd5c851c5f602204"
+    },
+    {
+      "path": "floatmemo-ai-android/app/src/test/java/io/github/floatmemo/android/WindowGeometryTest.java",
+      "sha256": "069c167253cbe8c13b80495341483ddc7555ba9f1e2be34b4ad9237a85f81fa5"
+    },
+    {
+      "path": "floatmemo-ai-android/app/src/test/java/io/github/floatmemo/android/AiDocumentTest.java",
+      "sha256": "8cccc8c3ae2a89d968d2168f970017082f3a53d8842027b1a778bdba451e5241"
+    },
+    {
+      "path": "floatmemo-ai-android/app/src/test/java/io/github/floatmemo/android/ApiResponseTest.java",
+      "sha256": "098693955a8872255a916d5f7ee38307ea95f2e483c2f367331267adc2182087"
+    },
+    {
+      "path": "floatmemo-ai-android/app/src/test/java/io/github/floatmemo/android/DiagnosticRecordTest.java",
+      "sha256": "5403967aba971969b0ca89cf40ec3266bb486562c5b9bc79d74eff9c52f8bde7"
+    },
+    {
+      "path": "floatmemo-ai-android/app/src/test/java/io/github/floatmemo/android/NoteTest.java",
+      "sha256": "63300acd101def06f2eeac8ec9fd076eadadad502c7d7c2c7c63f23ce9c49550"
+    },
+    {
+      "path": "floatmemo-ai-android/app/build.gradle",
+      "sha256": "4f85e05ededf44c9628d340b381c7467a699d2edc4e90c319ac56001ee13946f"
+    },
+    {
+      "path": "floatmemo-ai-android/build.gradle",
+      "sha256": "c3c0cf04da0fc239f391c774554d97d890018ab6e37e87cc62f6070d0c8c9909"
+    },
+    {
+      "path": "floatmemo-ai-android/settings.gradle",
+      "sha256": "c5b9265e83ae1f18925d2328a01d1cb9f915639ece313fc53dcd637e81244f5f"
+    },
+    {
+      "path": "floatmemo-ai-android/gradle.properties",
+      "sha256": "27c04c06674b6de2fd2ec2ab85885ef9472a8696da5b0434a5a0c368d3c9bbcb"
+    }
+  ],
+  "previous_validation": "52 JVM tests, APK v2/v3 and install structure checks passed 2026-10-25; not rerun during synchronization",
+  "not_tested": [
+    "真实设备覆盖升级",
+    "V0.2.6模拟器交互",
+    "真实模型服务联调",
+    "Gradle lint",
+    "公开构建脚本的环境变量签名路径"
+  ],
+  "excluded": "API Key、签名私钥和密码、私人笔记和日志、APK、SDK及大型归档",
+  "binary_files": [
+    "docs/requirements/FloatMemo_AI_Requirements_V1.docx",
+    "floatmemo-ai-android/app/test-libs/json-20240303.jar",
+    "floatmemo-ai-android/gradle/wrapper/gradle-wrapper.jar"
+  ]
+}

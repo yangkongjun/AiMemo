@@ -1,0 +1,12 @@
+{
+  "0_2_5": {
+    "certificate_sha256": "48c18d24b9bbe983674249919f73fc31fd29dfa55de23529c1f17f94136b3cd1",
+    "package": "package: name='io.github.floatmemo.android' versionCode='7' versionName='0.2.5-ai-preview' platformBuildVersionName='15' platformBuildVersionCode='35' compileSdkVersion='35' compileSdkVersionCodename='15'",
+    "sha256": "c1ba51cf4df6b94faf4c1dc4876d49a4d1d7e4d8545ddc353c2f01392c1fc0d6"
+  },
+  "0_2_6": {
+    "certificate_sha256": "48c18d24b9bbe983674249919f73fc31fd29dfa55de23529c1f17f94136b3cd1",
+    "package": "package: name='io.github.floatmemo.android' versionCode='8' versionName='0.2.6-ai-preview' platformBuildVersionName='15' platformBuildVersionCode='35' compileSdkVersion='35' compileSdkVersionCodename='15'",
+    "sha256": "6f0137b43d5aff0b79228b1471e40119c6814c979cc5b11500d5a277968729b7"
+  }
+}

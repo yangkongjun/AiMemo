@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh-CN" xml:lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>FloatMemo AI：自己修改与打包手册</title>
+  <style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; }
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; }
+code span.at { color: #7d9029; }
+code span.bn { color: #40a070; }
+code span.bu { color: #008000; }
+code span.cf { color: #007020; font-weight: bold; }
+code span.ch { color: #4070a0; }
+code span.cn { color: #880000; }
+code span.co { color: #60a0b0; font-style: italic; }
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; }
+code span.do { color: #ba2121; font-style: italic; }
+code span.dt { color: #902000; }
+code span.dv { color: #40a070; }
+code span.er { color: #ff0000; font-weight: bold; }
+code span.ex { }
+code span.fl { color: #40a070; }
+code span.fu { color: #06287e; }
+code span.im { color: #008000; font-weight: bold; }
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; }
+code span.kw { color: #007020; font-weight: bold; }
+code span.op { color: #666666; }
+code span.ot { color: #007020; }
+code span.pp { color: #bc7a00; }
+code span.sc { color: #4070a0; }
+code span.ss { color: #bb6688; }
+code span.st { color: #4070a0; }
+code span.va { color: #19177c; }
+code span.vs { color: #4070a0; }
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; }
+</style>
+  <style type="text/css">:root{font-family:system-ui,"Microsoft YaHei","Noto Sans CJK SC",sans-serif;color:#233b31;background:#f5f4ef;line-height:1.8}body{max-width:1000px;margin:32px auto;padding:36px 44px;background:white;border-radius:14px}h1{font-size:29px;line-height:1.4}h2{margin-top:2.3em;padding-top:.4em;border-top:2px solid #dbe5dd;color:#235b45}h3{margin-top:1.8em}p,li{overflow-wrap:anywhere}a{color:#1b654d}nav#TOC{background:#edf3ed;padding:18px 24px;border-radius:10px}nav#TOC ul{margin:.2em 0;padding-left:1.3em}blockquote{margin:18px 0;padding:12px 20px;border-left:4px solid #397654;background:#f2f6f0}table{border-collapse:collapse;width:100%;display:block;overflow:auto;font-size:14px;margin:18px 0}td,th{border:1px solid #d9e1da;padding:9px 12px;text-align:left;vertical-align:top}th{background:#edf2ec}code{font-family:Consolas,monospace;background:#f1f3f1;padding:.1em .3em;border-radius:3px;font-size:.9em}pre{background:#f0f3f0;padding:15px;border-radius:7px;white-space:pre-wrap;overflow-wrap:anywhere}pre code{background:none;padding:0}#title-block-header{padding-bottom:12px;border-bottom:1px solid #dbe5dd}@media(max-width:700px){body{margin:0;padding:22px 16px;border-radius:0}h1{font-size:24px}}@media print{body{margin:0;padding:0;max-width:none}h2,h3{break-after:avoid}pre,blockquote{break-inside:avoid}a{color:inherit}nav{break-after:page}}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">FloatMemo AI：自己修改与打包手册</h1>
+</header>
+<nav id="TOC" role="doc-toc">
+<h2 id="toc-title">从这里找到你要改的地方</h2>
+<ul>
+<li><a href="#先分清哪些改动不用重新安装" id="toc-先分清哪些改动不用重新安装">1.
+先分清：哪些改动不用重新安装</a></li>
+<li><a href="#第一次准备好电脑和项目" id="toc-第一次准备好电脑和项目">2.
+第一次准备好电脑和项目</a></li>
+<li><a href="#每次修改的固定流程" id="toc-每次修改的固定流程">3.
+每次修改的固定流程</a></li>
+<li><a href="#常见修改照着找到对应位置" id="toc-常见修改照着找到对应位置">4. 常见修改：照着找到对应位置</a></li>
+<li><a href="#判断自己该不该动这个模块" id="toc-判断自己该不该动这个模块">5. 判断自己该不该动这个模块</a></li>
+<li><a href="#想以后只执行一条构建命令一次性配置" id="toc-想以后只执行一条构建命令一次性配置">6.
+想以后只执行一条构建命令：一次性配置</a></li>
+<li><a href="#修改后怎样检查失败时怎样退回" id="toc-修改后怎样检查失败时怎样退回">7.
+修改后怎样检查，失败时怎样退回</a></li>
+<li><a href="#常见卡点" id="toc-常见卡点">8. 常见卡点</a></li>
+<li><a href="#最适合第一次动手的任务" id="toc-最适合第一次动手的任务">9.
+最适合第一次动手的任务</a></li>
+<li><a href="#对照文件与官方资料" id="toc-对照文件与官方资料">10.
+对照文件与官方资料</a></li>
+</ul>
+</nav>
+<blockquote>
+<p><strong>这份手册的目标：把开发环境配置一次，以后自己修改小功能、生成
+APK、覆盖更新，不必每次找人重新下载。</strong></p>
+<p>对应本对话已归档的 <strong>安卓 V0.2.6</strong>，操作电脑以 Windows
+为例。不是 Windows 桌面应用的开发手册。编写日期：2026-10-26。</p>
+</blockquote>
+<h2 id="先分清哪些改动不用重新安装">1. 先分清：哪些改动不用重新安装</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>想调整什么</th>
+<th>现在怎么做</th>
+<th>是否需要改代码</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>接口地址、模型、API Key、每日请求上限、暂停 AI</td>
+<td>应用里的“AI 设置”</td>
+<td>不需要</td>
+</tr>
+<tr class="even">
+<td>笔记的颜色、字号、透明度</td>
+<td>打开笔记编辑页调整</td>
+<td>不需要</td>
+</tr>
+<tr class="odd">
+<td>笔记的主题、标签、AI 要点</td>
+<td>在整理详情中修改；必要时解锁后重新整理</td>
+<td>不需要</td>
+</tr>
+<tr class="even">
+<td>诊断当前配置、复制或导出错误记录</td>
+<td>更多 → 诊断记录</td>
+<td>不需要</td>
+</tr>
+<tr class="odd">
+<td>首页文字、按钮名称、整体配色</td>
+<td>修改源码，再打包</td>
+<td>需要</td>
+</tr>
+<tr class="even">
+<td>AI 整理偏好、单次输出上限、超时、候选数量</td>
+<td>修改源码，再打包</td>
+<td>需要</td>
+</tr>
+<tr class="odd">
+<td>云同步、新增数据字段、全库语义检索</td>
+<td>涉及多个模块，不属于简单改数值</td>
+<td>需要设计和开发</td>
+</tr>
+</tbody>
+</table>
+<p><strong>当前 APK 不支持修改手机外部文件就热更新 Java
+代码。</strong>文案和程序逻辑改动仍要重新生成
+APK；区别是这一步以后由你在自己的电脑完成。若希望提示词、输出上限也能在应用设置中修改，需要另做一次功能开发，本手册没有假装这些设置已经存在。</p>
+<h2 id="第一次准备好电脑和项目">2. 第一次准备好电脑和项目</h2>
+<h3 id="找到正确的源码目录">2.1 找到正确的源码目录</h3>
+<p>解压项目归档后，打开里面的 <code>floatmemo-ai-android</code>
+文件夹。这个文件夹中应能同时看到
+<code>settings.gradle</code>、<code>build.gradle</code>、<code>gradlew.bat</code>
+和 <code>app</code>。<strong>在 Android Studio 选择 Open
+时选这个目录，不是最外层归档目录。</strong></p>
+<p>用副本做修改。例如把源码复制到
+<code>C:\FloatMemo\work\floatmemo-ai-android</code>，保留原归档。后文说的“项目根目录”就是这个源码文件夹。</p>
+<h3 id="安装和同步">2.2 安装和同步</h3>
+<ol type="1">
+<li>从 <a href="https://developer.android.com/studio">Android Studio
+官网</a>安装 IDE。用 Open 打开上述项目，等待 Gradle 同步。</li>
+<li>在 SDK Manager 安装 <strong>Android SDK Platform 35</strong> 和
+<strong>Android SDK Build-Tools 35.0.0</strong>。如果还要用 USB
+调试，安装 Platform-Tools。</li>
+<li>给该项目的 Gradle 选择 <strong>JDK 17</strong>。常见入口为 Settings
+→ Build, Execution, Deployment → Build Tools → Gradle → Gradle JDK；不同
+IDE 版本的菜单名称可能略有不同。</li>
+<li>先保留项目的 <strong>AGP 8.7.3、Gradle Wrapper 8.9、SDK
+35</strong>。第一次同步时不要同时接受整套构建插件升级，先让原项目能构建。</li>
+</ol>
+<p>项目已包含 Wrapper，不需要单独安装系统版
+Gradle。第一次同步需要下载构建依赖；核心归档没有离线 SDK
+二进制。SDK、依赖下载失败与 Java
+源码编译失败是不同问题，不应靠乱改版本来尝试解决。</p>
+<p>在 Android Studio 的 Terminal 中执行：</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode powershell"><code class="sourceCode powershell"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="op">.</span>\gradlew<span class="op">.</span><span class="fu">bat</span> <span class="op">--</span>version</span></code></pre></div>
+<p>检查显示的 Gradle 和 JVM。<strong>IDE 里配置的 Gradle JDK
+与终端使用的 JAVA_HOME 可能不同</strong>；如果终端执行失败而 IDE
+能构建，先检查两者用的 Java。此工程使用 JDK 17，既不是手机的 Android
+版本，也不是 Windows 的 .NET 版本。</p>
+<h3 id="准备同一份签名避免再次卸载丢笔记">2.3
+准备同一份签名，避免再次卸载丢笔记</h3>
+<p>取出单独保存的
+<code>FloatMemo_AI_Signing_Maintenance_20261025.zip</code>。里面有
+<code>preview-signing.keystore</code> 和
+<code>SIGNING_README.md</code>，别名及密码见该文件。密钥不在公开源码包里。</p>
+<p>同一个应用覆盖更新，需要维持：</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>项目</th>
+<th>本项目值</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>applicationId（包名）</td>
+<td><code>io.github.floatmemo.android</code></td>
+</tr>
+<tr class="even">
+<td>签名证书 SHA256</td>
+<td><code>48c18d24b9bbe983674249919f73fc31fd29dfa55de23529c1f17f94136b3cd1</code></td>
+</tr>
+<tr class="odd">
+<td>归档版 versionCode</td>
+<td><code>8</code></td>
+</tr>
+<tr class="even">
+<td>你自己的下一版</td>
+<td>例如 <code>9</code>，之后再用
+<code>10</code>、<code>11</code>……</td>
+</tr>
+</tbody>
+</table>
+<p>不要在签名向导里点“Create new”去替代现有密钥。电脑默认生成的 debug
+密钥也不是这份密钥。<strong>如果安装器要求卸载旧应用，先停下来检查签名；不要用卸载绕过。</strong></p>
+<h2 id="每次修改的固定流程">3. 每次修改的固定流程</h2>
+<p><strong>复制备份 → 改一处 → 提高版本代码 → 编译检查 → 用原密钥签名 →
+在手机上覆盖安装 → 验证这一个改动。</strong></p>
+<p>先完成下面的“改首页文案”练习，就能走通全部流程。不必一开始理解所有
+Java 类。</p>
+<h3 id="用搜索代码定位而不是记行号">3.1
+用“搜索代码”定位，而不是记行号</h3>
+<p>Android Studio 中把左侧目录视图切到 Project，可看到实际目录。用
+<code>Ctrl+Shift+F</code>
+搜索指定代码或界面文字，限定在当前项目。行号可能变化，<strong>文件名 +
+唯一代码片段</strong>更可靠。</p>
+<p>大多数 Java 文件位于：</p>
+<pre class="text"><code>app/src/main/java/io/github/floatmemo/android/</code></pre>
+<p>下文只写 <code>MainActivity.java</code>
+等短文件名时，均指这个目录。</p>
+<h3 id="修改版本代码">3.2 修改版本代码</h3>
+<p>打开 <strong><code>app/build.gradle</code></strong>，找到：</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode groovy"><code class="sourceCode groovy"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>versionCode <span class="dv">8</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>versionName <span class="st">&#39;0.2.6-ai-preview&#39;</span></span></code></pre></div>
+<p>自己的首次修改可以改为：</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode groovy"><code class="sourceCode groovy"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>versionCode <span class="dv">9</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>versionName <span class="st">&#39;0.2.7-local1&#39;</span></span></code></pre></div>
+<p>以后继续升高 <code>versionCode</code>，不要反复固定为
+9。<code>versionName</code> 是显示名称，<code>versionCode</code>
+才用于版本顺序。保持 <code>applicationId</code> 原值。</p>
+<h3 id="生成可覆盖更新的-apk先用签名向导">3.3 生成可覆盖更新的
+APK：先用签名向导</h3>
+<p>在 Android Studio 的 Build 菜单找到 <strong>Generate Signed App
+Bundle or APK</strong>（有的版本写成 Generate Signed Bundle/APK）：</p>
+<ol type="1">
+<li>选择 <strong>APK</strong>，不是 AAB。</li>
+<li>选择已经保存的
+<code>preview-signing.keystore</code>，填写维护说明中的别名与密码。</li>
+<li>选择 <code>app</code> 模块和 <code>release</code>
+构建变体，完成构建。这个项目的 release 没有开启混淆。</li>
+<li>完成后用提示中的 Locate 找到 APK。具体输出目录以 IDE
+提示为准，不要随手取另一个旧 APK。</li>
+</ol>
+<p><strong>这条路线不用你先改签名相关代码。</strong>第一次先使用它。以后若想一条命令生成，见第
+6 节的一次性配置。</p>
+<p>手机先通过“更多 → 导出全部便签（JSON）”保存一份备份，再用 USB
+文件传输把新 APK 复制到手机并打开，选择更新。后续无需向聊天下载
+APK，也不需要卸载重装。</p>
+<p>签名、版本和包名正确是覆盖更新的必要条件，不等于任何机型上的安装都一定成功。若失败，保留原应用与数据，查看安装提示。</p>
+<h2 id="常见修改照着找到对应位置">4. 常见修改：照着找到对应位置</h2>
+<h3 id="改首页标题或按钮文字适合第一次练习">4.1
+改首页标题或按钮文字：适合第一次练习</h3>
+<p>文件：<code>MainActivity.java</code>。搜索原代码：</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>root<span class="op">.</span><span class="fu">addView</span><span class="op">(</span>Ui<span class="op">.</span><span class="fu">bold</span><span class="op">(</span><span class="kw">this</span><span class="op">,</span><span class="st">&quot;随手记下，</span><span class="sc">\n</span><span class="st">以后找得到。&quot;</span><span class="op">,</span><span class="dv">32</span><span class="op">,</span>Ui<span class="op">.</span><span class="fu">INK</span><span class="op">));</span></span></code></pre></div>
+<p>例如改为：</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>root<span class="op">.</span><span class="fu">addView</span><span class="op">(</span>Ui<span class="op">.</span><span class="fu">bold</span><span class="op">(</span><span class="kw">this</span><span class="op">,</span><span class="st">&quot;随手记录，</span><span class="sc">\n</span><span class="st">慢慢想清楚。&quot;</span><span class="op">,</span><span class="dv">32</span><span class="op">,</span>Ui<span class="op">.</span><span class="fu">INK</span><span class="op">));</span></span></code></pre></div>
+<p>只改引号中的文字。<code>\n</code>
+表示换行，不要误删外面的引号、括号和分号。按钮如“主题标签”“AI
+设置”也可按原文字搜索，只改显示文字。</p>
+<p>检查方式：编译成功后看首页是否显示正确，有没有换行挤压。纯文案修改不必重跑网络接口测试。</p>
+<p>一部分可复用文字位于
+<code>app/src/main/res/values/strings.xml</code>。修改 XML 时保留
+<code>%1$d</code>、<code>%2$d</code> 等占位符；<code>&amp;</code> 要写成
+<code>&amp;amp;</code>，<code>&lt;</code> 要写成
+<code>&amp;lt;</code>。</p>
+<h3 id="改整体配色">4.2 改整体配色</h3>
+<p>文件：<code>Ui.java</code>。搜索
+<code>GREEN = Color.rgb(35,99,75)</code>。例如把主绿色换为蓝色：</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>GREEN <span class="op">=</span> <span class="bu">Color</span><span class="op">.</span><span class="fu">rgb</span><span class="op">(</span><span class="dv">42</span><span class="op">,</span><span class="dv">98</span><span class="op">,</span><span class="dv">165</span><span class="op">)</span></span></code></pre></div>
+<p>只替换这个表达式的数字，保留所在行的其他变量。<code>BG</code>
+是页面底色，<code>INK</code> 是主要文字色，<code>MUTED</code>
+是次要文字色。</p>
+<p><code>COLORS</code> 是便签色板，和
+<code>COLOR_NAMES</code>、已有笔记的颜色索引对应。<strong>只更换现有 8
+个颜色值比新增或删除颜色项简单</strong>；改数量还涉及
+<code>Note.fromJson</code> 的索引范围和编辑页。</p>
+<p>检查主页、编辑页和整理详情的文字是否看得清。已有单张笔记的颜色仍可在应用内调整。</p>
+<h3 id="改-ai-的表达风格不改变输出结构">4.3 改 AI
+的表达风格，不改变输出结构</h3>
+<p>文件：<code>AiClient.java</code>。搜索
+<code>private static final String RULES</code>。可以在现有规则中补一句：</p>
+<pre class="text"><code>要点先写一句直接的结论，再在原文有例子时用原例子帮助理解；用自然、简洁的中文。</code></pre>
+<p>它需要放进 Java 字符串的引号内；字符串本身包含双引号时须写成
+<code>\&quot;</code>。一次只加一条偏好，避免规则互相矛盾。</p>
+<p><strong>保留 JSON 输出、quote
+逐字原文依据、不补写事实等现有约束。</strong>只改风格时，不要改
+<code>summary</code>、<code>points</code>、<code>text</code>、<code>quote</code>
+等字段名称；<code>AiDocument.java</code>
+正按这些字段解析。提示词变了不会自动重写已经整理的笔记，要在目标笔记点“重新整理”；人工锁定的结果要按界面提示处理。</p>
+<p>检查方式：用几条自己熟悉的笔记整理，看原文有没有被改、quote
+能否定位、内容是否符合新增风格。编译和单元测试不能自动证明表达质量。</p>
+<h3 id="改正式请求的输出上限例如-3000-6000">4.4
+改正式请求的输出上限，例如 3000 → 6000</h3>
+<p>文件：<code>AiClient.java</code>。有两处正式请求：</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>outputs<span class="op">.</span><span class="fu">add</span><span class="op">(</span><span class="fu">chat</span><span class="op">(</span>c<span class="op">,</span>RULES<span class="op">,</span>instruction<span class="op">+</span>data<span class="op">,</span>epoch<span class="op">,</span><span class="st">&quot;笔记整理 第&quot;</span><span class="op">+(</span>i<span class="op">+</span><span class="dv">1</span><span class="op">)+</span><span class="st">&quot;/&quot;</span><span class="op">+</span>chunks<span class="op">.</span><span class="fu">size</span><span class="op">()+</span><span class="st">&quot;段&quot;</span><span class="op">,</span><span class="dv">3000</span><span class="op">,</span><span class="kw">false</span><span class="op">,</span>answer<span class="op">-&gt;</span>AiDocument<span class="op">.</span><span class="fu">parse</span><span class="op">(</span>answer<span class="op">.</span><span class="fu">text</span><span class="op">,</span>chunk<span class="op">)));</span></span></code></pre></div>
+<p>以及：</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="cf">return</span> <span class="fu">chat</span><span class="op">(</span>c<span class="op">,</span>system<span class="op">,</span><span class="kw">new</span> <span class="fu">JSONObject</span><span class="op">().</span><span class="fu">put</span><span class="op">(</span><span class="st">&quot;query&quot;</span><span class="op">,</span>query<span class="op">).</span><span class="fu">put</span><span class="op">(</span><span class="st">&quot;notes&quot;</span><span class="op">,</span>a<span class="op">).</span><span class="fu">toString</span><span class="op">(),</span>epoch<span class="op">,</span><span class="st">&quot;AI 查找&quot;</span><span class="op">,</span><span class="dv">3000</span><span class="op">,</span><span class="kw">false</span><span class="op">,</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    answer<span class="op">-&gt;</span><span class="fu">searchResults</span><span class="op">(</span>answer<span class="op">.</span><span class="fu">text</span><span class="op">,</span>map<span class="op">,</span>sent<span class="op">));</span></span></code></pre></div>
+<p>只改这两处
+<code>3000</code>。只想改变整理时，改第一处；检索也要增加时，再改第二处。<strong>不要全项目替换
+3000 或 64。</strong></p>
+<p>这里控制请求中的
+<code>max_tokens</code>，不是汉字数量，也不等于笔记长度。6000
+是修改示例，不是对所用模型支持范围的保证。服务不支持时可能拒绝请求，生成更长也可能增加等待或费用。</p>
+<p>诊断短测试目前单独用
+<code>64</code>，它只测接口响应。若改变短测试数值，还要同步其返回提示里的“64
+token”。正式整理达到上限时仍应拒绝不完整结果，不要删掉
+<code>ApiResponse</code> 中的截断检查来让它看起来成功。</p>
+<p>检查方式：打开诊断记录，看“本次输出上限”“completion_tokens”和“finish_reason”，再验证实际整理结果完整。</p>
+<h3 id="改网络等待时间">4.5 改网络等待时间</h3>
+<p>文件：<code>AiClient.java</code>。搜索：</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>conn<span class="op">.</span><span class="fu">setConnectTimeout</span><span class="op">(</span><span class="dv">12000</span><span class="op">);</span>conn<span class="op">.</span><span class="fu">setReadTimeout</span><span class="op">(</span><span class="dv">60000</span><span class="op">);</span></span></code></pre></div>
+<p>例如只把读取等待改为 120 秒：</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>conn<span class="op">.</span><span class="fu">setConnectTimeout</span><span class="op">(</span><span class="dv">12000</span><span class="op">);</span>conn<span class="op">.</span><span class="fu">setReadTimeout</span><span class="op">(</span><span class="dv">120000</span><span class="op">);</span></span></code></pre></div>
+<p>单位是毫秒。连接超时和读取超时是不同设置；更长等待不会解决错误地址、权限不足或响应格式不匹配，也不是整次任务总时长保证。</p>
+<p>检查方式：看诊断的失败阶段与耗时，不要因为超时而重复点击产生很多请求。</p>
+<h3 id="改-ai-检索候选数量例如-30-20">4.6 改 AI 检索候选数量，例如 30 →
+20</h3>
+<p>文件：<code>SearchEngine.java</code>。定位 <code>candidates</code>
+方法末尾：</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="cf">return</span> r<span class="op">.</span><span class="fu">subList</span><span class="op">(</span><span class="dv">0</span><span class="op">,</span><span class="bu">Math</span><span class="op">.</span><span class="fu">min</span><span class="op">(</span><span class="dv">30</span><span class="op">,</span>r<span class="op">.</span><span class="fu">size</span><span class="op">()));</span></span></code></pre></div>
+<p>改为：</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="cf">return</span> r<span class="op">.</span><span class="fu">subList</span><span class="op">(</span><span class="dv">0</span><span class="op">,</span><span class="bu">Math</span><span class="op">.</span><span class="fu">min</span><span class="op">(</span><span class="dv">20</span><span class="op">,</span>r<span class="op">.</span><span class="fu">size</span><span class="op">()));</span></span></code></pre></div>
+<p>这改变送给 AI
+的候选数量上限，不会删除笔记。减少候选可能减少发送量，也可能降低找回机会。搜索仍是“本地挑选候选
++ AI 检查”，不是全库语义索引。</p>
+<p>检查 <code>SearchEngineTest.java</code>
+中候选上限的测试是否仍反映你的新需求，保留“数量不越界”的约束。再用一个已知相关笔记的查询验证它是否仍能入选，不能只改断言让测试变绿。</p>
+<h3 id="改相关笔记显示数量例如-5-8">4.7 改相关笔记显示数量，例如 5 →
+8</h3>
+<p>文件：<code>SearchEngine.java</code>，定位 <code>related</code>
+方法，不是 <code>candidates</code> 方法：</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="cf">return</span> r<span class="op">.</span><span class="fu">subList</span><span class="op">(</span><span class="dv">0</span><span class="op">,</span><span class="bu">Math</span><span class="op">.</span><span class="fu">min</span><span class="op">(</span><span class="dv">5</span><span class="op">,</span>r<span class="op">.</span><span class="fu">size</span><span class="op">()));</span></span></code></pre></div>
+<p>改为
+<code>Math.min(8,r.size())</code>。这里的相关推荐主要按本地内容与标签重合计算；增加条数不会自动让关联更准确。检查原笔记不被推荐给自己、没有候选时页面能正常显示。</p>
+<h3 id="改每条候选发送多少文字要同时改界面说明">4.8
+改每条候选发送多少文字：要同时改界面说明</h3>
+<p>文件：<code>AiClient.java</code>，定位 <code>search</code> 方法：</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="bu">String</span> text<span class="op">=</span>n<span class="op">.</span><span class="fu">content</span><span class="op">.</span><span class="fu">substring</span><span class="op">(</span><span class="dv">0</span><span class="op">,</span><span class="bu">Math</span><span class="op">.</span><span class="fu">min</span><span class="op">(</span><span class="dv">1400</span><span class="op">,</span>n<span class="op">.</span><span class="fu">content</span><span class="op">.</span><span class="fu">length</span><span class="op">()));</span></span></code></pre></div>
+<p>例如改为 2000。然后同步修改
+<code>app/src/main/res/values/strings.xml</code> 中
+<code>ai_search_running</code> 和 <code>ai_search_finished</code>
+的“1400字符”，避免用户看到的发送范围与实际不一致。不要删除这些资源中的格式占位符。</p>
+<p>检查长短笔记都能搜索，界面显示正确，且响应速度和发送量可接受。这里按
+Java 字符串长度截取，不应在这一改动中随便移除原文引用校验。</p>
+<h3 id="改-ai-自动整理最多保留的标签数有三处">4.9 改 AI
+自动整理最多保留的标签数：有三处</h3>
+<p>以 8 → 6 为例：</p>
+<ol type="1">
+<li><code>AiClient.java</code> 的整理提示词：“最多8个标签” →
+“最多6个标签”。</li>
+<li><code>AiDocument.java</code> 的 <code>parse</code>
+方法：<code>tags.length()&lt;8</code> →
+<code>tags.length()&lt;6</code>。</li>
+<li>同文件 <code>combine</code>
+方法：<code>if(a.length()==8)break;</code> →
+<code>if(a.length()==6)break;</code>。</li>
+</ol>
+<p>不要全项目替换数字 8。单标签长度限制 30、问题数量上限
+8、颜色数等是别的规则。这改变的是 AI
+新整理结果的上限，不会自动清理已有标签，也不等于限制所有手工标签。</p>
+<p>检查一篇短笔记和一篇会分段的长笔记，验证标签总数及原文引用。修改后运行
+<code>AiDocumentTest</code> 相关测试。</p>
+<h3 id="改新建便签默认字号">4.10 改新建便签默认字号</h3>
+<p>文件：<code>Note.java</code>。搜索：</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="dt">int</span> fontSize <span class="op">=</span> <span class="dv">16</span><span class="op">;</span></span></code></pre></div>
+<p>例如改为 18。它影响新建笔记，已有笔记已存了字号，不会因此全部变成
+18。已有便签直接在编辑页调整即可。<code>fromJson</code> 中
+<code>optInt(&quot;fontSize&quot;,16)</code>
+是读取缺失字段时的默认值，只有你也想改变旧备份缺字段的回退行为时才一起改。</p>
+<p>检查新建笔记的正文和悬浮窗是否变化，已有笔记是否仍保持原样。当前字号的读取和操作范围为
+12–26，超出范围还需同步其他校验。</p>
+<h3 id="改自动整理开始前的等待">4.11 改自动整理开始前的等待</h3>
+<p>这不是只改一个 5000。当前有两层：</p>
+<ul>
+<li><code>NoteRepository.java</code> 的 <code>claim</code> 方法要求
+<code>System.currentTimeMillis()-n.updatedAt&gt;=5000</code>，即内容至少静置约
+5 秒才可领取。</li>
+<li><code>AiJobService.java</code> 的 <code>schedule</code> 方法包含
+<code>.setMinimumLatency(5500)</code>，这是系统调度的最小延迟。</li>
+</ul>
+<p>若想约 10 秒后再尝试，可分别改为 10000 和 10500。不要改
+<code>AiDocument</code> 分段算法里的另一个
+5000，它是文字分段位置判断。</p>
+<p>Android
+后台调度还受网络、电量和系统策略影响，所以不是“第10秒保证开始”。检查持续输入时不会立刻整理、停止输入后会排队，以及原有编辑内容不会被在途结果覆盖。</p>
+<h3 id="改诊断保留数量或提示文案">4.12 改诊断保留数量或提示文案</h3>
+<ul>
+<li><code>DiagnosticStore.java</code>：<code>MAX_RECORDS=30</code>
+控制最多保留多少条请求记录。</li>
+<li><code>DiagnosticRecord.java</code>：<code>PREVIEW_LIMIT=4000</code>
+控制单条响应片段长度。</li>
+<li><code>ApiResponse.java</code>：固定的网络/协议错误提示与错误类型。</li>
+<li><code>DiagnosticActivity.java</code>：诊断页面按钮和测试状态说明。</li>
+</ul>
+<p>改显示文字时保持错误类型代码和脱敏处理。增加记录数会扩大页面、复制和导出内容，不必无限加大。不要把
+API Key、Authorization 请求头或完整笔记正文写进日志。</p>
+<h2 id="判断自己该不该动这个模块">5. 判断自己该不该动这个模块</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>模块</th>
+<th>负责什么</th>
+<th>普通小修改是否优先动它</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>MainActivity</code>、<code>AiSettingsActivity</code>、<code>Ui</code></td>
+<td>界面、设置页、外观</td>
+<td>是，文案与外观从这里开始</td>
+</tr>
+<tr class="even">
+<td><code>AiClient</code></td>
+<td>提示词、请求参数、响应处理衔接</td>
+<td>可改提示词和明确参数；改前核对联动</td>
+</tr>
+<tr class="odd">
+<td><code>SearchEngine</code></td>
+<td>本地搜索、候选、相关笔记</td>
+<td>可改数量；换算法需要验证找回效果</td>
+</tr>
+<tr class="even">
+<td><code>AiDocument</code>、<code>ApiResponse</code></td>
+<td>输出结构、原文引用、协议及完整性检查</td>
+<td>只改明确限制；不要为消除报错删校验</td>
+</tr>
+<tr class="odd">
+<td><code>NoteRepository</code>、<code>ImportPolicy</code></td>
+<td>数据库存取、备份导入、冲突处理</td>
+<td>小问题通常不需要动</td>
+</tr>
+<tr class="even">
+<td><code>ResultGate</code>、revision/epoch、人工锁定</td>
+<td>防止旧结果覆盖新内容及人工纠正</td>
+<td>不要顺手删除</td>
+</tr>
+<tr class="odd">
+<td><code>OverlayService</code>、<code>FloatingNoteWindow</code>、Manifest</td>
+<td>悬浮窗、后台服务与系统权限</td>
+<td>改行为时要在手机上验证</td>
+</tr>
+</tbody>
+</table>
+<p>比如“把主页标题换一句话”只需要动
+<code>MainActivity</code>；“加一个可以跨设备同步的主题字段”要考虑存储、JSON备份、界面、同步冲突，就不能当成改几个字。</p>
+<h2 id="想以后只执行一条构建命令一次性配置">6.
+想以后只执行一条构建命令：一次性配置</h2>
+<p>这一步是可选的，已经能用签名向导就不必急着做。辅助包提供完整配置示例，<strong>不会自动改动你的归档源码，也不包含签名私钥</strong>。</p>
+<h3 id="文件放置">6.1 文件放置</h3>
+<p>在源码目录的同级建立 <code>private</code> 文件夹：</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>路径示例</th>
+<th>放什么</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>C:\FloatMemo\work\floatmemo-ai-android\</code></td>
+<td>工程源码</td>
+</tr>
+<tr class="even">
+<td><code>C:\FloatMemo\work\private\preview-signing.keystore</code></td>
+<td>维护包里的原签名文件</td>
+</tr>
+<tr class="odd">
+<td><code>C:\FloatMemo\work\private\signing.properties</code></td>
+<td>你自己填写的签名参数</td>
+</tr>
+</tbody>
+</table>
+<p>将辅助包中的 <code>examples/signing.properties.example</code> 复制到
+<code>private/signing.properties</code>，把占位符替换为维护包
+<code>SIGNING_README.md</code> 给出的值。字段是
+<code>storePassword</code>、<code>keyAlias</code>、<code>keyPassword</code>。</p>
+<p>先备份原 <code>app/build.gradle</code>，再把
+<code>examples/app.build.gradle.local-signing.example</code>
+的完整内容复制进去。示例沿用原项目依赖，新增本地签名配置，把示例版本代码设为
+9；如果你已经安装过更高版本，请再提高它。</p>
+<p>配置缺少私钥或密码时会明确停止，不会悄悄生成另一把钥匙。不要把
+<code>private</code> 目录上传到公共仓库。</p>
+<h3 id="以后在项目根目录执行">6.2 以后在项目根目录执行</h3>
+<div class="sourceCode" id="cb18"><pre class="sourceCode powershell"><code class="sourceCode powershell"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="op">.</span>\gradlew<span class="op">.</span><span class="fu">bat</span> assembleDebug</span></code></pre></div>
+<p>输出：</p>
+<pre class="text"><code>app/build/outputs/apk/debug/app-debug.apk</code></pre>
+<p>上述命令只有在配置好本节的原签名后，才会使用同一签名生成更新包。<strong>原始归档默认
+Gradle debug 签名不等于原安装包签名。</strong>不要跳过配置直接拿默认 APK
+覆盖已有应用。</p>
+<p>需要检查 AI 行为、检索或导入等逻辑时，运行：</p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode powershell"><code class="sourceCode powershell"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="op">.</span>\gradlew<span class="op">.</span><span class="fu">bat</span> testDebugUnitTest</span></code></pre></div>
+<p>需要静态检查时，单独运行：</p>
+<div class="sourceCode" id="cb21"><pre class="sourceCode powershell"><code class="sourceCode powershell"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="op">.</span>\gradlew<span class="op">.</span><span class="fu">bat</span> lintDebug</span></code></pre></div>
+<p>这三个命令不等于已经在你的 Windows 上成功执行过。归档 APK
+之前使用的是随包记录的 Linux 手工工具链；本手册提供 Windows/Android
+Studio 的维护路线，本次没有远程操作你的电脑完成环境配置。</p>
+<h2 id="修改后怎样检查失败时怎样退回">7.
+修改后怎样检查，失败时怎样退回</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>修改类型</th>
+<th>最少做哪些检查</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>文案、颜色、默认字号</td>
+<td>编译通过；打开对应页面；新旧笔记各看一条</td>
+</tr>
+<tr class="even">
+<td>提示词、输出参数、超时</td>
+<td>编译；跑相关测试；实际整理熟悉的笔记；查看诊断</td>
+</tr>
+<tr class="odd">
+<td>候选数、相似度、检索片段</td>
+<td>跑检索相关测试；用已知能找到和应该找不到的查询检查</td>
+</tr>
+<tr class="even">
+<td>标签上限、输出结构或引用规则</td>
+<td>跑结构相关测试；短文和长文各测；确认不接受无来源内容</td>
+</tr>
+<tr class="odd">
+<td>存储、迁移或导入导出</td>
+<td>用独立测试备份验证，不直接拿唯一正式数据试错</td>
+</tr>
+</tbody>
+</table>
+<p>归档版记录的是 <strong>52项 JVM
+测试通过</strong>，不意味着改过以后仍自动通过，也不意味着所有手机及所有模型都已验收。对纯文案改动不必反复调用收费模型。</p>
+<p>修改前复制相关文件，或者用 Git 提交一个本地检查点。IDE 有 Undo/Local
+History，但不要把它当作手机笔记备份。</p>
+<p>若新行为不好，恢复上一份源文件，使用更高的 <code>versionCode</code>
+重新构建。不要为了安装旧版本而卸载。手机数据备份与源码回退是两件事。</p>
+<h2 id="常见卡点">8. 常见卡点</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>现象</th>
+<th>先检查什么</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Gradle下载失败、无法解析依赖</td>
+<td>网络和下载地址；不是先改业务代码</td>
+</tr>
+<tr class="even">
+<td>提示找不到SDK或Build Tools</td>
+<td>SDK Manager是否装好35及35.0.0，IDE是否知道SDK路径</td>
+</tr>
+<tr class="odd">
+<td>Java/JVM版本错误</td>
+<td>Gradle JDK及终端JAVA_HOME；此工程按JDK17维护</td>
+</tr>
+<tr class="even">
+<td>修改一个文字就编译失败</td>
+<td>双引号、Java转义、括号、分号；XML实体和格式占位符</td>
+</tr>
+<tr class="odd">
+<td>签名私钥/属性文件找不到</td>
+<td>private是否位于项目同级，不是app目录里面；文件是否被保存成.properties.txt</td>
+</tr>
+<tr class="even">
+<td>更新包提示签名冲突</td>
+<td>是否用了电脑默认debug密钥，是否取错APK；保留旧应用，不卸载</td>
+</tr>
+<tr class="odd">
+<td>提示版本过低</td>
+<td>新versionCode是否高于当前安装版本；只改versionName没有作用</td>
+</tr>
+<tr class="even">
+<td>改了默认字号但旧笔记没变化</td>
+<td>旧笔记保存自己的fontSize；改默认值影响新建笔记</td>
+</tr>
+<tr class="odd">
+<td>改了提示词但结果没变化</td>
+<td>是否重新整理，是否仍显示旧结果，是否人工锁定</td>
+</tr>
+<tr class="even">
+<td><code>MISSING_CHOICES</code></td>
+<td>看诊断响应，是否请求到了欢迎入口或其他协议</td>
+</tr>
+<tr class="odd">
+<td>连接测试显示64 token达上限</td>
+<td>只说明短测试达到预算；继续看实际笔记整理，不必直接换模型</td>
+</tr>
+</tbody>
+</table>
+<p>项目不需要
+Node/npm，也没有给此安卓版配置浏览器热更新。不要把其他平台工程的启动方式套到这里。</p>
+<h2 id="最适合第一次动手的任务">9. 最适合第一次动手的任务</h2>
+<p>先只把首页“随手记下，以后找得到”改成你喜欢的一句话，保持其他逻辑不变。提高版本代码，用原密钥签名，把生成的
+APK 传到手机覆盖更新，然后确认标题变化、旧笔记还在。</p>
+<p><strong>这一次走通后，后续的小改动就是重复同一条流程。</strong>应用内本来已有的设置，仍优先直接在应用里修改。</p>
+<h2 id="对照文件与官方资料">10. 对照文件与官方资料</h2>
+<p>本手册的文件位置与搜索片段已对照归档V0.2.6源码核对。行号不作为定位条件。提供的本地签名示例未在用户Windows环境实测；没有重新打包或改变当前手机应用。</p>
+<ul>
+<li>项目原有说明：<code>README.md</code>、<code>DIAGNOSTICS.md</code>、<code>VALIDATION.md</code>、<code>REQUIREMENT_STATUS.md</code>。</li>
+<li><a href="https://developer.android.com/studio">Android
+Studio下载</a>。</li>
+<li><a href="https://developer.android.com/studio/intro/update#sdk-manager">SDK
+Manager说明</a>。</li>
+<li><a href="https://developer.android.com/build/jdks">构建使用的Java/JDK</a>。</li>
+<li><a href="https://developer.android.com/build/releases/agp-8-7-0-release-notes">AGP
+8.7兼容信息：Gradle 8.9、JDK17</a>。</li>
+<li><a href="https://developer.android.com/build/building-cmdline">命令行构建</a>。</li>
+<li><a href="https://developer.android.com/studio/publish/app-signing">应用签名与签名向导</a>。</li>
+</ul>
+</body>
+</html>

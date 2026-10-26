@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 2,
+  "folders": [
+    "人际交往",
+    "学习"
+  ],
+  "notes": [
+    {
+      "id": "demo-chat",
+      "title": "聊天时想不到话题",
+      "content": "今天散步时一直聊工作，后来没话说。我当时觉得自己想不到其他可以分享的事。我的猜测是我只盯着对方上一句话，没想到自己的经历也能分享。下次试着主动说一件自己最近遇到的事，再问对方有没有类似经历。",
+      "folder": "人际交往",
+      "createdAt": 1792857600000,
+      "updatedAt": 1792857600000,
+      "revision": 1,
+      "folderLocked": true
+    },
+    {
+      "id": "demo-share",
+      "title": "主动分享经历",
+      "content": "只问问题有时会让聊天像问答。我的一个尝试是先说自己的小经历，让对方有东西可以接。例如提到周末看到的一部电影，再问他最近看过什么。这个办法还没有持续试过。",
+      "folder": "人际交往",
+      "createdAt": 1792857600001,
+      "updatedAt": 1792857600001,
+      "revision": 1,
+      "folderLocked": true
+    },
+    {
+      "id": "demo-research",
+      "title": "论文阅读记录",
+      "content": "读认证协议时先弄清参与者、每个人保存的秘密，以及每条消息要验证什么。暂时不要跳到安全证明。下次阅读时逐条画消息流程。",
+      "folder": "学习",
+      "createdAt": 1792857600002,
+      "updatedAt": 1792857600002,
+      "revision": 1,
+      "folderLocked": true
+    }
+  ]
+}

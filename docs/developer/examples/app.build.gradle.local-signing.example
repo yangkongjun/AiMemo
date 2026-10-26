@@ -1,0 +1,56 @@
+// Optional maintenance example for FloatMemo Android V0.2.6.
+// Copy to app/build.gradle only after reading the guide and preparing ../private/.
+plugins { id 'com.android.application' }
+
+def localSigning = new Properties()
+def localSigningFile = rootProject.file('../private/signing.properties')
+def localKeyStore = rootProject.file('../private/preview-signing.keystore')
+if (!localSigningFile.exists() || !localKeyStore.exists()) {
+    throw new GradleException('Missing existing signing key or ../private/signing.properties. Do not generate a replacement key.')
+}
+localSigningFile.withInputStream { localSigning.load(it) }
+['storePassword', 'keyAlias', 'keyPassword'].each { field ->
+    if (!localSigning.getProperty(field)?.trim() || localSigning.getProperty(field).startsWith('REPLACE_')) {
+        throw new GradleException('Missing signing property: ' + field)
+    }
+}
+
+android {
+    namespace 'io.github.floatmemo.android'
+    compileSdk 35
+    buildToolsVersion '35.0.0'
+    defaultConfig {
+        applicationId 'io.github.floatmemo.android'
+        minSdk 26
+        targetSdk 35
+        // Increase above your currently installed version on every new update.
+        versionCode 9
+        versionName '0.2.7-local1'
+        testInstrumentationRunner 'android.test.InstrumentationTestRunner'
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+    signingConfigs {
+        localMaintenance {
+            storeFile localKeyStore
+            storePassword localSigning.getProperty('storePassword')
+            keyAlias localSigning.getProperty('keyAlias')
+            keyPassword localSigning.getProperty('keyPassword')
+        }
+    }
+    buildTypes {
+        debug { signingConfig signingConfigs.localMaintenance }
+        release {
+            minifyEnabled false
+            signingConfig signingConfigs.localMaintenance
+        }
+    }
+    lint { abortOnError true }
+}
+
+dependencies {
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation files('test-libs/json-20240303.jar')
+}

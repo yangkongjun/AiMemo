@@ -1,0 +1,30 @@
+plugins { id 'com.android.application' }
+
+android {
+    namespace 'io.github.floatmemo.android'
+    compileSdk 35
+    buildToolsVersion '35.0.0'
+    defaultConfig {
+        applicationId 'io.github.floatmemo.android'
+        minSdk 26
+        targetSdk 35
+        versionCode 8
+        versionName '0.2.6-ai-preview'
+        testInstrumentationRunner 'android.test.InstrumentationTestRunner'
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+        }
+    }
+    lint { abortOnError true }
+}
+
+dependencies {
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation files('test-libs/json-20240303.jar')
+}
