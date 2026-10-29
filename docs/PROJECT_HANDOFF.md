@@ -1,3 +1,7 @@
+# V0.3.2列表界面更新
+
+当前版本0.3.2-ai-preview、versionCode 11。标签及主题点击从标题弹窗改为本地只读NoteListActivity卡片列表，包含原文预览和元数据、ListView复用、可见笔记锚点恢复。需求限于区分笔记与样式，未改变AI逻辑或数据格式。设备显示和交互仍待检查；见[本次交付](releases/V0_3_2.md)。
+
 # V0.3.1接收层更新
 
 当前版本0.3.1-ai-preview、versionCode 10。新流式开关默认开启，保留原token及连接配置；短测试仍普通接收。ResponseReader有界读取当前HTTP响应，NetworkTrace记录白名单网络特征。完整结果仍走原文、锁定、代次和epoch保护，不自动重连/补发。不声称已定位或修复用户真实服务约74秒断连，细节见[交付说明](releases/V0_3_1.md)。

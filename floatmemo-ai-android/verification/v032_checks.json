@@ -1,0 +1,29 @@
+{
+  "date": "2026-10-29",
+  "versionName": "0.3.2-ai-preview",
+  "versionCode": 11,
+  "package": "io.github.floatmemo.android",
+  "apk_sha256": "90005cf566a7c7ce445c2f6ad9c16abcefe5aa3a8002bbdeeb3d37db080a2237",
+  "apk_bytes": 123432,
+  "certificate_sha256": "48c18d24b9bbe983674249919f73fc31fd29dfa55de23529c1f17f94136b3cd1",
+  "apk_v2": true,
+  "apk_v3": true,
+  "structure": {
+    "resources_uncompressed": true,
+    "resources_data_offset": 2700,
+    "resources_alignment": 4,
+    "zip_crc_valid": true,
+    "note_list_activity_registered": true,
+    "note_list_activity_in_dex": true
+  },
+  "jvm_tests_passed": 133,
+  "jvm_tests_failed": 0,
+  "ui_validation": "Production Java/resources compiled and new Activity packaged. Source review only for note cards, exact filtering, recycling, live refresh and anchor restoration; no Android runtime or screenshot validation. No new UI tests were added for this layout change.",
+  "not_run": [
+    "真机/模拟器界面、触控、长列表、大字体、读屏、旋转和返回位置恢复",
+    "实际设备覆盖安装与数据保留",
+    "真实模型联调",
+    "Gradle lint"
+  ],
+  "private_data": "No private keys, credentials, user notes or diagnostics committed."
+}

@@ -8,8 +8,8 @@ android {
         applicationId 'io.github.floatmemo.android'
         minSdk 26
         targetSdk 35
-        versionCode 10
-        versionName '0.3.1-ai-preview'
+        versionCode 11
+        versionName '0.3.2-ai-preview'
         testInstrumentationRunner 'android.test.InstrumentationTestRunner'
     }
     compileOptions {

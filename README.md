@@ -1,7 +1,8 @@
 # FloatMemo AI（安卓）
 
-当前版本：**V0.3.1，versionCode 10**。在V0.3.0图文笔记和搜索预算基础上，增加可关闭的流式接收和更细的断连诊断。
+当前版本：**V0.3.2，versionCode 11**。点击标签或主题后进入独立卡片列表，展示标题、原文预览、标签、主题和时间，便于区分笔记。保留V0.3.1的流式接收和断连诊断。
 
+- [V0.3.2标签与主题卡片列表](docs/releases/V0_3_2.md)
 - [V0.3.1流式接收与断连诊断](docs/releases/V0_3_1.md)
 - [完整使用说明与构建入口](floatmemo-ai-android/README.md)
 - [V0.3.0使用和开发补充](docs/developer/V0_3_0_Usage_And_Development.md)
@@ -12,7 +13,7 @@
 
 源码位于 `floatmemo-ai` 分支。继续使用原包名和签名，先备份后覆盖安装，不卸载。应用数据仍在手机本机，Git同步不包含手机笔记。
 
-本版已完成代码、本机自动验证及合成HTTP分段测试；真机/模拟器交互、覆盖升级、设备中断恢复和真实模型服务仍需验证。具体范围见[验证记录](floatmemo-ai-android/VALIDATION.md)。本次并未确认真实服务断连的唯一根因。
+验证状态与未测项目见[验证记录](floatmemo-ai-android/VALIDATION.md)。新卡片页仍需在手机检查显示、滚动和返回；既有合成HTTP测试不代表真实模型服务或断连根因验收。
 
 仓库不包含API Key、签名私钥、密码、个人笔记、APK或SDK。安装包通过本次交付单独提供，不自动发布GitHub Release或合并main。
 

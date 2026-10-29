@@ -1,3 +1,21 @@
+# V0.3.2验证记录
+
+日期2026-10-29。包名io.github.floatmemo.android，版本0.3.2-ai-preview，versionCode 11。
+
+- 本次完整生产Java/资源编译、AAPT2/ECJ/D8、zipalign和原证书签名通过；新NoteListActivity已进入DEX并注册到二进制清单。
+- 原有133项JVM回归全部通过，失败0。此次布局改动没有新增镜像实现的测试；这133项不能验证新界面外观或交互。
+- APK v2/v3签名、资源表未压缩与4字节对齐、ZIP CRC、包名/版本和清单检查通过；证书与V0.3.1一致。仅核验覆盖升级身份条件，没有实际执行手机安装。
+- 源码检查卡片复用、整标签/主题匹配、图像标记不进文字预览、空态、订阅刷新及笔记ID锚点恢复。列表不发AI请求，不修改笔记存储或配置。
+- 未运行：Android真机/模拟器、界面截图、触控/长列表/大字体/读屏、旋转/返回位置恢复、实际覆盖升级和数据保留、真实模型联调、Gradle lint。
+
+APK SHA256：`90005cf566a7c7ce445c2f6ad9c16abcefe5aa3a8002bbdeeb3d37db080a2237`，字节数123432。
+
+证书SHA256：`48c18d24b9bbe983674249919f73fc31fd29dfa55de23529c1f17f94136b3cd1`。资源表数据偏移2700，4字节对齐。
+
+机器记录见verification/v032_checks.json、verification/build-v032.log；[本次交付说明](../docs/releases/V0_3_2.md)包含修改入口与手机验收步骤。以下为既有版本记录，不视为新增设备验证。
+
+---
+
 # V0.3.1验证记录
 
 日期2026-10-27。包名io.github.floatmemo.android，版本0.3.1-ai-preview，versionCode 10。
