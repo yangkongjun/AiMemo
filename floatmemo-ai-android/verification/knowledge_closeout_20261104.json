@@ -1,0 +1,88 @@
+{
+  "date": "2026-11-04",
+  "scope": "Current FloatMemo Android checkout and its docs/rules; knowledge closeout, not feature development or release.",
+  "baseline_commit": "df5b1911e2008a5201f65eb9b838f751f3e834a4",
+  "application_version": "0.3.2-ai-preview",
+  "versionCode": 11,
+  "deleted_files": [],
+  "removed_or_rewritten_content": [
+    "Obsolete current-version sections and old fixed AI/search values in project handoff",
+    "Bootstrap-only empty-repository instructions and unapproved-feature wording in current delivery guide",
+    "Old archive-only source entry and stale install instructions in current developer/diagnostic entry points"
+  ],
+  "retained": [
+    "All 106 pre-existing tracked files, including original requirements and historical plans/releases/validation",
+    "All FR01-FR21 requirement rows and their unimplemented scope",
+    "Original APKs, signatures/toolchain material and ignored build residue kept in place",
+    "Unfinished goals and unapproved discussion leads, separately labelled in REQUIREMENT_STATUS.md"
+  ],
+  "changed_existing_files": [
+    "AGENTS.md",
+    "README.md",
+    "docs/GIT_DELIVERY.md",
+    "docs/PROJECT_HANDOFF.md",
+    "docs/developer/FloatMemo_Developer_Guide_Android_V0_2_6.html",
+    "docs/developer/FloatMemo_Developer_Guide_Android_V0_2_6.md",
+    "docs/developer/README.md",
+    "docs/developer/V0_3_0_Usage_And_Development.md",
+    "docs/planning/FloatMemo_Change_Proposal_V0_3_Review.md",
+    "floatmemo-ai-android/DIAGNOSTICS.md",
+    "floatmemo-ai-android/REQUIREMENT_STATUS.md"
+  ],
+  "facts": {
+    "code": {
+      "state": "verified-current",
+      "evidence": "Read version/config/search/analysis/job sources; all non-document tracked bytes unchanged from baseline."
+    },
+    "runtime": {
+      "state": "pending",
+      "evidence": "Local delivered V0.3.2 APK SHA256 matches existing record; no phone live version, UI, upgrade or model integration check."
+    },
+    "docs": {
+      "state": "changed-and-verified",
+      "evidence": "Current entry points aligned; historical guides and approved scheme labelled; local paths/anchors checked below."
+    },
+    "rules": {
+      "state": "changed-and-verified",
+      "evidence": "Current applicable project AGENTS.md read and refined; no higher-level rule candidates reported by inventory."
+    },
+    "memory": {
+      "state": "out-of-scope",
+      "evidence": "Generated memory untouched. Cross-conversation retrieval unavailable; reminders use repository and visible conversation only."
+    },
+    "workspace": {
+      "state": "changed-and-verified",
+      "evidence": "Tracked/local files mechanically enumerated without following external toolchain directory links; no files deleted or renamed. Existing ignored material retained."
+    }
+  },
+  "review_strategy": "Enumerate all project files; review current and affected docs plus relevant sources; preserve historical evidence. Not an exhaustive code/security audit.",
+  "checks": {
+    "tracked_baseline_files": 106,
+    "markdown_files_enumerated": 16,
+    "all_original_files_retained": true,
+    "application_build_test_resources_and_data_artifacts_unchanged": true,
+    "all_21_requirement_rows_retained": true,
+    "unfinished_goals_and_discussion_leads_retained": true,
+    "historical_prd_and_release_validation_unchanged": true,
+    "current_apk_matches_prior_sha256": true,
+    "local_document_links_checked": 58,
+    "markdown_heading_targets_checked": 4,
+    "local_link_errors": 0,
+    "html_internal_anchors_valid": true
+  },
+  "not_run": [
+    "No new JVM, Gradle, APK build or signature validation for this docs-only change; prior 133-test result remains historical.",
+    "No Android device installation, live UI or real model requests.",
+    "No external website/link availability checks."
+  ],
+  "out_of_scope": [
+    "Windows implementation and other projects",
+    "Phone notes, private data, global/generated memories",
+    "Deletion of caches, old APKs/archives or signing material"
+  ],
+  "warnings": [
+    "Reminder list does not claim complete recall of all earlier conversations.",
+    "Unimplemented goals and proposals are retained without new feature approval or scheduling.",
+    "Existing device/model/quality verification gaps remain pending."
+  ]
+}

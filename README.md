@@ -5,6 +5,9 @@
 - [V0.3.2标签与主题卡片列表](docs/releases/V0_3_2.md)
 - [V0.3.1流式接收与断连诊断](docs/releases/V0_3_1.md)
 - [完整使用说明与构建入口](floatmemo-ai-android/README.md)
+- [当前交接与继续开发入口](docs/PROJECT_HANDOFF.md)
+- [未完成想法提醒](floatmemo-ai-android/REQUIREMENT_STATUS.md#未完成想法提醒)：仍想做的目标与讨论线索，保留待定状态
+- [开发文档入口](docs/developer/README.md)
 - [V0.3.0使用和开发补充](docs/developer/V0_3_0_Usage_And_Development.md)
 - [原V0.2.6开发手册](docs/developer/FloatMemo_Developer_Guide_Android_V0_2_6.md)：Android Studio、本地修改和签名基础
 - [变更与验证记录](docs/releases/V0_3_0.md)
