@@ -15,6 +15,10 @@ public final class Note {
     public int fontSize = 16;
     public int x = 20, y = 100, width = 292, height = 300;
     public boolean open = false, compact = false;
+    public boolean task=false;
+    public long completedAt=0,dueAt=0,reminderAt=0,reminderGeneration=0,reminderFiredAt=0,deletedAt=0;
+    public java.util.List<TextFormat.Range> formats=new java.util.ArrayList<>();
+    public java.util.Map<Integer,Boolean> checks=new java.util.LinkedHashMap<>();
     public long updatedAt = System.currentTimeMillis();
     public long createdAt = updatedAt, revision = 1, aiRevision = 0;
     public String aiJson = "", aiStatus = "未整理", aiError = "", topicSuggestion = "";
@@ -44,12 +48,14 @@ public final class Note {
         n.folderLocked=folderLocked; n.tagsLocked=tagsLocked; n.aiLocked=aiLocked;
         n.reviewed=reviewed; n.attempts=attempts;n.dismissedRelations=dismissedRelations;
         n.aiSourceHash=aiSourceHash;n.aiGeneration=aiGeneration;n.attachments=new java.util.ArrayList<>(attachments);
+        n.task=task;n.completedAt=completedAt;n.dueAt=dueAt;n.reminderAt=reminderAt;n.reminderGeneration=reminderGeneration;n.reminderFiredAt=reminderFiredAt;n.deletedAt=deletedAt;n.formats=new java.util.ArrayList<>(formats);n.checks=new java.util.LinkedHashMap<>(checks);
         return n;
     }
 
     public JSONObject toJson() throws JSONException {
         org.json.JSONArray assets=new org.json.JSONArray();for(Attachment a:attachments)assets.put(a.toJson());
-        return new JSONObject().put("attachments",assets).put("aiSourceHash",aiSourceHash).put("aiGeneration",aiGeneration).put("id", id).put("title", title).put("content", content)
+        org.json.JSONArray checked=new org.json.JSONArray();for(java.util.Map.Entry<Integer,Boolean> e:checks.entrySet())checked.put(new JSONObject().put("start",e.getKey()).put("checked",e.getValue()));
+        return new JSONObject().put("task",task).put("completedAt",completedAt).put("dueAt",dueAt).put("reminderAt",reminderAt).put("reminderGeneration",reminderGeneration).put("reminderFiredAt",reminderFiredAt).put("deletedAt",deletedAt).put("formats",TextFormat.json(formats)).put("checks",checked).put("attachments",assets).put("aiSourceHash",aiSourceHash).put("aiGeneration",aiGeneration).put("id", id).put("title", title).put("content", content)
             .put("folder", folder).put("color", color).put("opacity", opacity)
             .put("fontSize", fontSize).put("x", x).put("y", y).put("width", width)
             .put("height", height).put("open", open).put("compact", compact)
@@ -83,6 +89,9 @@ public final class Note {
         n.attempts=j.optInt("attempts",0);n.dismissedRelations=j.optString("dismissedRelations","");
         n.aiSourceHash=j.optString("aiSourceHash","");n.aiGeneration=Math.max(0,j.optLong("aiGeneration",0));
         org.json.JSONArray assets=j.optJSONArray("attachments");if(assets!=null)for(int i=0;i<assets.length();i++)try{n.attachments.add(Attachment.fromJson(assets.getJSONObject(i)));}catch(Exception e){throw new IllegalArgumentException("笔记附件信息损坏",e);}
+        n.task=j.optBoolean("task",false);n.completedAt=Math.max(0,j.optLong("completedAt",0));n.dueAt=Math.max(0,j.optLong("dueAt",0));n.reminderAt=Math.max(0,j.optLong("reminderAt",0));n.reminderGeneration=Math.max(0,j.optLong("reminderGeneration",0));n.reminderFiredAt=Math.max(0,j.optLong("reminderFiredAt",0));n.deletedAt=Math.max(0,j.optLong("deletedAt",0));
+        try{n.formats=TextFormat.read(j.optJSONArray("formats"));org.json.JSONArray a=j.optJSONArray("checks");if(a!=null){if(a.length()>TextFormat.MAX_RANGES)throw new IllegalArgumentException("清单状态过多");for(int i=0;i<a.length();i++){JSONObject c=a.getJSONObject(i);n.checks.put(c.getInt("start"),c.getBoolean("checked"));}}TextFormat.validate(n);}catch(JSONException e){throw new IllegalArgumentException("文字格式或清单数据损坏",e);}
+        if(!n.task){n.completedAt=0;n.dueAt=0;n.reminderAt=0;}if(!NoteTasks.canFloat(n))n.open=false;
         return n;
     }
 }

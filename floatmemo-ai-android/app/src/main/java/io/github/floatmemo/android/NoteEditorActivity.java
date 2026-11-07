@@ -15,7 +15,7 @@ import java.util.List;
 public final class NoteEditorActivity extends BaseActivity implements NoteRepository.Listener {
     private NoteRepository repo;
     private String id;
-    private EditText title, body;
+    private EditText title;private FormatEditText body;private FormatToolbar formatBar;private Button taskState;
     private TextView folderLabel, opacityLabel;
     private NotePreviewRenderer preview;
     private int insertAt;private long insertRevision;private boolean importingImage;
@@ -39,13 +39,17 @@ public final class NoteEditorActivity extends BaseActivity implements NoteReposi
         root.addView(bar);Ui.space(root,12);
         title=Ui.input(this,"便签标题（可留空）");title.setSingleLine(true);title.setTextSize(21);root.addView(title);
         Ui.space(root,8);
+        taskState=Ui.button(this,"任务/提醒",false,v->TaskUi.show(this,id));root.addView(taskState);
         LinearLayout toolbar=Ui.row(this);
         toolbar.addView(Ui.button(this,"编辑 / 预览",false,v->{previewing=!previewing;updateMode();}));
         toolbar.addView(Ui.button(this,"外观",false,v->appearancePanel.setVisibility(appearancePanel.getVisibility()==View.VISIBLE?View.GONE:View.VISIBLE)));
         toolbar.addView(Ui.button(this,"插图",false,v->pickImages()));
+        toolbar.addView(Ui.button(this,"清单",false,v->BodyEditing.insertList(body,"- [ ] ")));
+        toolbar.addView(Ui.button(this,"编号",false,v->BodyEditing.insertList(body,"1. ")));
         TextView spacer=Ui.text(this,"",12,Ui.MUTED);toolbar.addView(spacer,new LinearLayout.LayoutParams(0,1,1));
         toolbar.addView(Ui.button(this,"更多",false,v->more()));HorizontalScrollView toolbarScroll=new HorizontalScrollView(this);toolbarScroll.setHorizontalScrollBarEnabled(false);toolbarScroll.addView(toolbar);root.addView(toolbarScroll);Ui.space(root,10);
-        body=Ui.input(this,"写点什么…\n\n支持 Markdown 标题、列表、粗体和代码块。");
+        body=new FormatEditText(this);body.setHint("写点什么…选中文字可滑动选择格式");
+        formatBar=new FormatToolbar(this,body,repo,id);root.addView(formatBar);
         body.setGravity(Gravity.TOP|Gravity.START);
         body.setInputType(android.text.InputType.TYPE_CLASS_TEXT|android.text.InputType.TYPE_TEXT_FLAG_MULTI_LINE|android.text.InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
         body.setHorizontallyScrolling(false);
@@ -78,7 +82,7 @@ public final class NoteEditorActivity extends BaseActivity implements NoteReposi
             public void onStopTrackingTouch(SeekBar b){repo.flush();}
         });opacityRow.addView(opacity,new LinearLayout.LayoutParams(0,Ui.dp(this,40),1));appearancePanel.addView(opacityRow);root.addView(appearancePanel);
         title.addTextChangedListener(new MainActivity.Watcher(){public void afterTextChanged(Editable e){if(!binding)repo.update(id,n->n.title=e.toString());}});
-        body.addTextChangedListener(new MainActivity.Watcher(){public void afterTextChanged(Editable e){if(!binding)repo.update(id,n->n.content=e.toString());}});
+        BodyEditing.attach(body,repo,id,()->binding,()->true);
         load();
         String quote=getIntent().getStringExtra("sourceQuote");
         if(quote!=null&&!quote.isEmpty()){int at=getIntent().getIntExtra("sourceStart",-1);String raw=body.getText().toString();if(at<0||!raw.startsWith(quote,at))at=NoteBodyParser.locate(raw,quote);if(at>=0){previewing=false;updateMode();body.requestFocus();body.setSelection(at,at+quote.length());}}
@@ -94,16 +98,18 @@ public final class NoteEditorActivity extends BaseActivity implements NoteReposi
         binding=true;
         if(!title.getText().toString().equals(n.title))title.setText(n.title);
         if(!body.getText().toString().equals(n.content)){int cursor=body.getSelectionStart();body.setText(n.content);body.setSelection(Math.max(0,Math.min(cursor,n.content.length())));}
-        binding=false;applyAppearance();updateMode();
+        binding=false;TextStyleSpans.apply(body.getText(),n);applyAppearance();updateMode();
     }
     private void applyAppearance(){
         Note n=repo.find(id);if(n==null)return;
         body.setTextSize(n.fontSize);
-        body.setBackground(Ui.round(this,Ui.COLORS[n.color],16));previewScroll.setBackground(Ui.round(this,Ui.COLORS[n.color],16));
+        body.setBackground(Ui.round(this,TaskUi.color(n),16));previewScroll.setBackground(Ui.round(this,TaskUi.color(n),16));
+        taskState.setText(TaskUi.summary(this,n)+" · 任务/提醒");taskState.setTextColor(NoteTasks.overdue(n,System.currentTimeMillis())?0xFFAF3030:Ui.GREEN);
         folderLabel.setText(getString(R.string.folder_name,n.folder.isEmpty()?"未分类":n.folder));
         opacityLabel.setText(getString(R.string.overlay_opacity,Math.round(n.opacity*100)));
     }
     private void updateMode(){
+        if(formatBar!=null){if(previewing)formatBar.setVisibility(View.GONE);else formatBar.refresh();}
         body.setVisibility(previewing?View.GONE:View.VISIBLE);previewScroll.setVisibility(previewing?View.VISIBLE:View.GONE);
         if(previewing){
             Note note=repo.find(id);if(note!=null)preview.render(note);
@@ -129,8 +135,8 @@ public final class NoteEditorActivity extends BaseActivity implements NoteReposi
             }else if(w==2){
                 startActivity(Intent.createChooser(new Intent(Intent.ACTION_SEND).setType("text/plain")
                     .putExtra(Intent.EXTRA_TEXT,n.title.isEmpty()?n.content:n.title+"\n\n"+n.content),"分享便签"));
-            }else new AlertDialog.Builder(this).setTitle("删除这张便签？").setMessage("删除后无法在应用中恢复。")
-                .setNegativeButton("取消",null).setPositiveButton("删除",(a,b)->{repo.delete(id);finish();}).show();
+            }else new AlertDialog.Builder(this).setTitle("删除这张便签？").setMessage("移入回收站后可恢复；永久删除需在回收站操作。")
+                .setNegativeButton("取消",null).setPositiveButton("删除",(a,b)->{if(repo.trashMany(java.util.Collections.singleton(id),false))finish();else Toast.makeText(this,repo.error,Toast.LENGTH_LONG).show();}).show();
         }).show();
     }
     @Override protected void onActivityResult(int request,int result,Intent data){
@@ -141,7 +147,7 @@ public final class NoteEditorActivity extends BaseActivity implements NoteReposi
             String content=exportType.equals("md")&&!n.title.isEmpty()?"# "+n.title+"\n\n"+n.content:n.content;
             try(OutputStream output=getContentResolver().openOutputStream(data.getData())){
                 if(output==null)throw new java.io.IOException("No output stream");
-                output.write(content.getBytes(StandardCharsets.UTF_8));Toast.makeText(this,"已导出文字；图片请用首页的完整ZIP备份保存",Toast.LENGTH_LONG).show();
+                output.write(content.getBytes(StandardCharsets.UTF_8));Toast.makeText(this,"已导出文字；局部样式、勾选和图片请用完整ZIP备份保存",Toast.LENGTH_LONG).show();
             }catch(Exception e){Toast.makeText(this,"导出失败，请重试",Toast.LENGTH_LONG).show();}
         }
     }

@@ -1,6 +1,6 @@
 # 每次交付的 Git 同步约定
 
-目标仓库为 https://github.com/yangkongjun/AiMemo.git ，源码与文档交付分支为 **floatmemo-ai**。main保留导航，不自动合并。当前实现与历史批准范围分别见 [交接](PROJECT_HANDOFF.md)、[需求状态](../floatmemo-ai-android/REQUIREMENT_STATUS.md) 和 [原审核方案](planning/FloatMemo_Change_Proposal_V0_3_Review.md)。
+目标仓库为 https://github.com/yangkongjun/AiMemo.git ，源码与文档默认交付分支为 **floatmemo-ai**。本次用户指定测试分支，V0.4.0 Test1只提交到 **feature/note-tasks-format-reminders**，不移动floatmemo-ai、不合并main。main保留导航，不自动合并。当前实现与历史批准范围分别见 [交接](PROJECT_HANDOFF.md)、[需求状态](../floatmemo-ai-android/REQUIREMENT_STATUS.md) 和 [原审核方案](planning/FloatMemo_Change_Proposal_V0_3_Review.md)。
 
 每次完成可交付代码或文档版本后：
 

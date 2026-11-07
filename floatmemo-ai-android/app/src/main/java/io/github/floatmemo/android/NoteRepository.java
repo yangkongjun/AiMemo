@@ -69,13 +69,14 @@ public final class NoteRepository {
     private void snapshot(Note n)throws Exception{ContentValues cv=new ContentValues();cv.put("id",n.id);cv.put("revision",n.revision);cv.put("data",n.toJson().toString());db.insertWithOnConflict("history",null,cv,SQLiteDatabase.CONFLICT_IGNORE);}
     private void changed(){main.post(()->{for(Listener l:new ArrayList<>(listeners))l.onNotesChanged();});}
     public void observe(Listener l){listeners.add(l);}public void removeObserver(Listener l){listeners.remove(l);}
-    public synchronized List<Note> all(){List<Note> list=new ArrayList<>();for(Note n:notes.values())list.add(n.copy());list.sort(Comparator.comparingLong((Note n)->n.updatedAt).reversed());return list;}
+    public synchronized List<Note> all(){List<Note> list=new ArrayList<>();for(Note n:notes.values())if(NoteTasks.active(n))list.add(n.copy());list.sort(NoteTasks.order());return list;}
     public synchronized List<String> folders(){return new ArrayList<>(folders);}
-    public synchronized Note find(String id){Note n=notes.get(id);return n==null?null:n.copy();}
+    public synchronized Note find(String id){Note n=notes.get(id);return NoteTasks.active(n)?n.copy():null;}
     public synchronized Note create(){Note n=new Note();notes.put(n.id,n);store(n);return n.copy();}
     private void store(Note n){trackSearch(n);try{persist(n);error="";}catch(Exception e){error="保存失败，请保留当前文字并导出备份。";}changed();}
     public synchronized void update(String id,Mutation fn){
-        Note n=notes.get(id);if(n==null)return;Note before=n.copy();fn.apply(n);
+        Note n=notes.get(id);if(!NoteTasks.active(n))return;Note before=n.copy();fn.apply(n);
+        TextFormat.rebase(n,before.content);
         n.attachments=NoteBodyParser.referenced(n);
         boolean raw=!before.content.equals(n.content)||!before.title.equals(n.title);
         boolean aiRaw=!NoteBodyParser.fingerprint(before).equals(NoteBodyParser.fingerprint(n));
@@ -93,16 +94,39 @@ public final class NoteRepository {
         n.updatedAt=System.currentTimeMillis();store(n);
         if(aiRaw&&!NoteBodyParser.text(n.content).trim().isEmpty()&&AiConfig.get(context).enabled())AiJobService.schedule(context);
     }
-    public synchronized void delete(String id){db.beginTransaction();try{db.delete("notes","id=?",new String[]{id});db.delete("history","id=?",new String[]{id});db.delete("edits","noteId=?",new String[]{id});db.setTransactionSuccessful();}finally{db.endTransaction();}notes.remove(id);searchStamps.remove(id);corpusVersion++;changed();}
+    public synchronized List<Note> trash(){List<Note> result=new ArrayList<>();for(Note n:notes.values())if(n.deletedAt>0)result.add(n.copy());result.sort(Comparator.comparingLong((Note n)->n.deletedAt).reversed());return result;}
+    public synchronized boolean editMetadata(String id,Mutation fn){
+        Note old=notes.get(id);if(!NoteTasks.active(old))return false;Note n=old.copy();
+        try{fn.apply(n);if(!n.content.equals(old.content)||!n.title.equals(old.title))throw new IllegalArgumentException("此操作只能修改便签状态或格式");TextFormat.validate(n);
+            boolean timing=n.task!=old.task||n.completedAt!=old.completedAt||n.dueAt!=old.dueAt||n.reminderAt!=old.reminderAt;
+            if(!n.task){n.completedAt=0;n.dueAt=0;n.reminderAt=0;}if(n.completedAt>0)n.open=false;
+            if(timing){n.reminderGeneration=old.reminderGeneration+1;if(n.dueAt!=old.dueAt||n.reminderAt!=old.reminderAt)n.reminderFiredAt=0;}
+            n.updatedAt=System.currentTimeMillis();persist(n);notes.put(id,n);error="";changed();if(timing)ReminderScheduler.schedule(context,n);return true;
+        }catch(Exception e){error="操作未保存，请检查存储空间后重试";changed();return false;}
+    }
+    public synchronized boolean checkItem(String id,long revision,int start,boolean value){Note n=notes.get(id);if(!NoteTasks.active(n)||n.revision!=revision)return false;boolean exists=false;for(TextFormat.Item i:TextFormat.items(n.content))if(i.start==start)exists=true;if(!exists)return false;return editMetadata(id,x->x.checks.put(start,value));}
+    public synchronized void delete(String id){trashMany(Collections.singleton(id),false);}
+    public synchronized boolean trashMany(Collection<String> ids,boolean restore){
+        List<Note> pending=new ArrayList<>();long now=System.currentTimeMillis();
+        for(String id:new LinkedHashSet<>(ids)){Note old=notes.get(id);if(old==null||restore!=(old.deletedAt>0))continue;Note n=old.copy();n.deletedAt=restore?0:now;n.open=false;n.aiGeneration++;n.reminderGeneration++;
+            if(n.aiStatus.equals("等待整理")||n.aiStatus.equals("整理中"))n.aiStatus=AiDocument.current(n)?n.reviewed?"已确认":"待确认":n.aiJson.isEmpty()?"未整理":"原文已更新";n.updatedAt=now;pending.add(n);}
+        db.beginTransaction();try{for(Note n:pending)persist(n);db.setTransactionSuccessful();}catch(Exception e){error="批量操作未保存，原便签已保留";return false;}finally{db.endTransaction();}
+        for(Note n:pending){notes.put(n.id,n);ReminderScheduler.schedule(context,n);}corpusVersion++;error="";changed();return true;
+    }
+    public synchronized boolean purgeMany(Collection<String> ids){
+        Set<String> targets=new LinkedHashSet<>();for(String id:ids){Note n=notes.get(id);if(n!=null&&n.deletedAt>0)targets.add(id);}
+        db.beginTransaction();try{for(String id:targets){db.delete("notes","id=?",new String[]{id});db.delete("history","id=?",new String[]{id});db.delete("edits","noteId=?",new String[]{id});}db.setTransactionSuccessful();}catch(Exception e){error="永久删除未完成，原记录已保留";return false;}finally{db.endTransaction();}
+        for(String id:targets){notes.remove(id);searchStamps.remove(id);ReminderScheduler.cancel(context,id);}corpusVersion++;error="";changed();return true;
+    }
     public synchronized boolean addFolder(String value){String f=value.trim();if(f.isEmpty()||!folders.add(f))return false;meta("folders",new JSONArray(folders).toString());changed();return true;}
     public synchronized void deleteFolder(String f){folders.remove(f);for(Note n:notes.values())if(n.folder.equals(f)){n.folder="";n.folderLocked=true;store(n);}meta("folders",new JSONArray(folders).toString());changed();}
-    public synchronized void setAllOpen(boolean open){for(Note n:notes.values()){n.open=open;store(n);}}
+    public synchronized void setAllOpen(boolean open){for(Note n:notes.values()){n.open=open&&NoteTasks.canFloat(n);store(n);}}
     public synchronized void flush(){for(Note n:notes.values())try{persist(n);}catch(Exception e){error="保存失败，请导出备份";}}
-    public synchronized void queue(String id,boolean unlock){Note n=notes.get(id);if(n==null||NoteBodyParser.text(n.content).trim().isEmpty())return;
+    public synchronized void queue(String id,boolean unlock){Note n=notes.get(id);if(!NoteTasks.active(n)||NoteBodyParser.text(n.content).trim().isEmpty())return;
         if(unlock){try{journal(n);}catch(Exception e){error="纠正历史保存失败";changed();return;}n.aiLocked=false;}if(n.aiLocked)return;n.aiGeneration++;n.aiStatus="等待整理";n.aiError="";n.attempts=0;store(n);AiJobService.schedule(context);}
-    public synchronized Note claim(){for(Note n:notes.values())if(n.aiStatus.equals("等待整理")&&!n.aiLocked&&!NoteBodyParser.text(n.content).trim().isEmpty()&&System.currentTimeMillis()-n.updatedAt>=5000){
+    public synchronized Note claim(){for(Note n:notes.values())if(NoteTasks.active(n)&&n.aiStatus.equals("等待整理")&&!n.aiLocked&&!NoteBodyParser.text(n.content).trim().isEmpty()&&System.currentTimeMillis()-n.updatedAt>=5000){
         n.aiStatus="整理中";try{snapshot(n);}catch(Exception e){n.aiStatus="整理失败";n.aiError="保存来源版本失败";store(n);return null;}store(n);return n.copy();}return null;}
-    public synchronized boolean hasPending(){for(Note n:notes.values())if(n.aiStatus.equals("等待整理")&&!n.aiLocked&&!NoteBodyParser.text(n.content).trim().isEmpty())return true;return false;}
+    public synchronized boolean hasPending(){for(Note n:notes.values())if(NoteTasks.active(n)&&n.aiStatus.equals("等待整理")&&!n.aiLocked&&!NoteBodyParser.text(n.content).trim().isEmpty())return true;return false;}
     private boolean accepts(Note n,Note requested){return ResultGate.accept(n,requested);}
     public synchronized void release(Note requested,String message,boolean retry){Note n=notes.get(requested.id);if(!accepts(n,requested))return;n.attempts++;n.aiStatus=retry&&n.attempts<3?"等待整理":"整理失败";n.aiError=message;store(n);}
     public synchronized boolean applyAi(Note requested,String json){Note n=notes.get(requested.id);if(!accepts(n,requested)||!AiDocument.validQuotes(json,n.content))return false;
@@ -115,7 +139,7 @@ public final class NoteRepository {
     public synchronized void editAi(String id,long expected,String json)throws Exception{Note n=notes.get(id);if(n==null||n.revision!=expected||!AiDocument.current(n))throw new Exception("原文已改变，请刷新后重新整理");journal(n);n.aiJson=json;n.aiGeneration++;n.aiLocked=true;n.reviewed=true;n.aiStatus="已人工修正";store(n);}
     public synchronized boolean undoEdit(String id){Note n=notes.get(id);if(n==null)return false;try(Cursor c=db.rawQuery("SELECT id,beforeData FROM edits WHERE noteId=? ORDER BY id DESC LIMIT 1",new String[]{id})){if(!c.moveToFirst())return false;Note old=Note.fromJson(new JSONObject(c.getString(1)));n.folder=old.folder;n.tags=old.tags;n.folderLocked=old.folderLocked;n.tagsLocked=old.tagsLocked;n.aiJson=old.aiJson;n.aiLocked=old.aiLocked;n.reviewed=old.reviewed;n.aiStatus=n.revision==old.aiRevision?old.aiStatus:"原文已更新";n.aiRevision=old.aiRevision;n.aiSourceHash=old.aiSourceHash;n.aiGeneration++;if(AiDocument.current(n))n.aiRevision=n.revision;db.delete("edits","id=?",new String[]{c.getString(0)});store(n);return true;}catch(Exception e){return false;}}
     public synchronized String exportJson()throws Exception{
-        JSONObject r=new JSONObject().put("schemaVersion",3).put("includesImageFiles",false);JSONArray ns=new JSONArray();for(Note n:notes.values())ns.put(n.toJson());
+        JSONObject r=new JSONObject().put("schemaVersion",4).put("includesImageFiles",false);JSONArray ns=new JSONArray();for(Note n:notes.values())ns.put(n.toJson());
         r.put("notes",ns).put("folders",new JSONArray(folders));
         JSONArray hs=new JSONArray(),es=new JSONArray();try(Cursor c=db.rawQuery("SELECT data FROM history",null)){while(c.moveToNext())hs.put(new JSONObject(c.getString(0)));}
         try(Cursor c=db.rawQuery("SELECT noteId,beforeData,created FROM edits",null)){while(c.moveToNext())es.put(new JSONObject().put("noteId",c.getString(0)).put("before",new JSONObject(c.getString(1))).put("created",c.getLong(2)));}
@@ -123,9 +147,9 @@ public final class NoteRepository {
     }
     public synchronized int importJson(String text)throws Exception{return importJsonInternal(text,"");}
     public synchronized void insertAttachments(String id,long expected,int position,List<Attachment> assets)throws Exception{
-        Note before=notes.get(id);if(before==null||before.revision!=expected)throw new Exception("笔记已改变，请重新选择插入位置");
+        Note before=notes.get(id);if(!NoteTasks.active(before)||before.revision!=expected)throw new Exception("笔记已改变或移入回收站，请重新选择插入位置");
         Note n=before.copy();int at=NoteBodyParser.floorBoundary(n.content,Math.max(0,Math.min(position,n.content.length())));StringBuilder markers=new StringBuilder();for(Attachment a:assets)markers.append(a.marker());
-        n.content=n.content.substring(0,at)+markers+n.content.substring(at);n.attachments.addAll(assets);NoteBodyParser.validate(n);n.revision++;n.updatedAt=System.currentTimeMillis();
+        n.content=n.content.substring(0,at)+markers+n.content.substring(at);TextFormat.rebase(n,before.content);n.attachments.addAll(assets);NoteBodyParser.validate(n);n.revision++;n.updatedAt=System.currentTimeMillis();
         if(AiDocument.current(n))n.aiRevision=n.revision;else if(!n.aiStatus.equals("等待整理")&&!n.aiStatus.equals("整理中")&&!n.aiJson.isEmpty()&&!AiDocument.validQuotes(n.aiJson,n.content))n.aiStatus="原文引用位置已改变";
         db.beginTransaction();try{snapshot(before);persist(n);db.setTransactionSuccessful();}finally{db.endTransaction();}notes.put(id,n);trackSearch(n);changed();
     }
@@ -147,7 +171,7 @@ public final class NoteRepository {
         JSONArray previous=new JSONArray(meta("import:"+fingerprint).isEmpty()?"[]":meta("import:"+fingerprint));
         Map<String,JSONObject> receipts=new HashMap<>();for(int i=0;i<previous.length();i++){JSONObject e=previous.getJSONObject(i);receipts.put(e.getString("original"),e);}
         JSONArray newReceipt=new JSONArray();Set<String> seenIds=new HashSet<>();
-        JSONObject r=new JSONObject(text);int version=r.optInt("schemaVersion",1);if(version<1||version>3)throw new Exception("不支持的备份版本");
+        JSONObject r=new JSONObject(text);int version=r.optInt("schemaVersion",1);if(version<1||version>4)throw new Exception("不支持的备份版本");
         JSONArray ns=r.getJSONArray("notes"),fs=r.optJSONArray("folders");if(ns.length()>10000)throw new Exception("单次最多导入10000条");
         List<Note> incoming=new ArrayList<>();Map<String,String> remap=new HashMap<>();
         for(int i=0;i<ns.length();i++){
@@ -157,7 +181,7 @@ public final class NoteRepository {
             JSONObject receipt=receipts.get(original);if(receipt!=null){Note imported=notes.get(receipt.getString("target"));
                 if(imported!=null&&ImportPolicy.signature(imported).equals(receipt.getString("signature"))){remap.put(original,imported.id);newReceipt.put(receipt);continue;}}
             Note old=notes.get(n.id);if(old!=null){if(ImportPolicy.signature(old).equals(ImportPolicy.signature(n))){newReceipt.put(new JSONObject().put("original",original).put("target",old.id).put("signature",ImportPolicy.signature(old)));continue;}n.id=UUID.randomUUID().toString();remap.put(original,n.id);}
-            if(n.aiStatus.equals("整理中")||n.aiStatus.equals("等待整理"))n.aiStatus="未整理";n.open=false;incoming.add(n);
+            if(n.aiStatus.equals("整理中")||n.aiStatus.equals("等待整理"))n.aiStatus="未整理";n.open=false;NoteTasks.resetImportedReminder(n);incoming.add(n);
             newReceipt.put(new JSONObject().put("original",original).put("target",n.id).put("signature",ImportPolicy.signature(n)));
         }
         LinkedHashSet<String> oldFolders=new LinkedHashSet<>(folders);

@@ -18,7 +18,7 @@ public final class FloatingNoteWindow {
     private final WindowManager manager;
     private final WindowManager.LayoutParams params;
     private final OverlayRoot root;
-    private final EditText body;
+    private final FormatEditText body;private final FormatToolbar formatBar;
     private final DragTextView title;
     private final TextView editButton;
     private final NotePreviewRenderer preview;
@@ -49,18 +49,18 @@ public final class FloatingNoteWindow {
         title.setOnTouchListener(new DragListener(false));
         title.setOnClickListener(v->{setEditing(false);repo.update(id,n->n.compact=!n.compact);});
         editButton=control("编辑",v->setEditing(!editing));header.addView(editButton);
+        TextView finishTask=control("✓",v->{setEditing(false);repo.editMetadata(id,n->{n.task=true;n.completedAt=System.currentTimeMillis();n.open=false;});});finishTask.setContentDescription("标记整张便签完成并关闭悬浮窗");header.addView(finishTask);
         header.addView(control("−",v->{setEditing(false);repo.update(id,n->n.compact=!n.compact);}));
         header.addView(control("×",v->{setEditing(false);repo.update(id,n->n.open=false);repo.flush();}));
         root.addView(header,new LinearLayout.LayoutParams(-1,Ui.dp(context,48)));
         View divider=new View(context);divider.setBackgroundColor(0x18233322);root.addView(divider,new LinearLayout.LayoutParams(-1,Ui.dp(context,1)));
         content=Ui.column(context);
-        body=Ui.input(context,"写点什么…");body.setBackgroundColor(android.graphics.Color.TRANSPARENT);
+        body=new FormatEditText(context);body.setHint("写点什么…");body.setBackgroundColor(android.graphics.Color.TRANSPARENT);
         body.setGravity(Gravity.TOP|Gravity.START);body.setSingleLine(false);
         body.setInputType(android.text.InputType.TYPE_CLASS_TEXT|android.text.InputType.TYPE_TEXT_FLAG_MULTI_LINE|android.text.InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
         body.setTextIsSelectable(true);body.setFocusable(false);body.setFocusableInTouchMode(false);
-        body.addTextChangedListener(new MainActivity.Watcher(){
-            public void afterTextChanged(Editable value){if(!binding&&editing)repo.update(id,n->n.content=value.toString());}
-        });
+        BodyEditing.attach(body,repo,id,()->binding,()->editing);
+        formatBar=new FormatToolbar(context,body,repo,id);content.addView(formatBar);
         content.addView(body,new LinearLayout.LayoutParams(-1,0,1));
         previewScroll=new ScrollView(context);preview=new NotePreviewRenderer(context);
         preview.setPadding(Ui.dp(context,12),Ui.dp(context,10),Ui.dp(context,12),Ui.dp(context,10));
@@ -85,12 +85,13 @@ public final class FloatingNoteWindow {
     public void refresh(Note note){
         boolean sizeChanged=current.compact!=note.compact;
         current=note;
-        root.setBackground(Ui.round(context,Ui.COLORS[note.color],16));root.setAlpha(note.opacity);
-        title.setText(note.displayTitle());body.setTextSize(note.fontSize);
+        root.setBackground(Ui.round(context,TaskUi.color(note),16));root.setAlpha(note.opacity);
+        title.setText((note.task?"待办 · ":"")+note.displayTitle());body.setTextSize(note.fontSize);
         if(!body.getText().toString().equals(note.content)){
             binding=true;int cursor=body.getSelectionStart();body.setText(note.content);
             if(editing)body.setSelection(Math.max(0,Math.min(cursor,body.length())));binding=false;
         }
+        TextStyleSpans.apply(body.getText(),note);
         if(previewing)preview.render(note);
         content.setVisibility(note.compact?View.GONE:View.VISIBLE);
         editButton.setVisibility(note.compact?View.GONE:View.VISIBLE);
@@ -98,6 +99,7 @@ public final class FloatingNoteWindow {
         updateContentMode();
     }
     private void updateContentMode(){
+        if(previewing||!editing)formatBar.setVisibility(View.GONE);else formatBar.refresh();
         body.setVisibility(previewing?View.GONE:View.VISIBLE);
         previewScroll.setVisibility(previewing?View.VISIBLE:View.GONE);
         if(previewing)preview.render(current);
@@ -108,7 +110,7 @@ public final class FloatingNoteWindow {
         if(value){
             previewing=false;updateContentMode();
             params.flags&=~WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
-            body.setFocusableInTouchMode(true);body.setFocusable(true);editButton.setText("完成");updateLayout();
+            body.setFocusableInTouchMode(true);body.setFocusable(true);editButton.setText("收起");updateLayout();
             body.requestFocus();
             body.postDelayed(()->{if(attached&&editing)((InputMethodManager)context.getSystemService(Context.INPUT_METHOD_SERVICE))
                 .showSoftInput(body,InputMethodManager.SHOW_IMPLICIT);},100);

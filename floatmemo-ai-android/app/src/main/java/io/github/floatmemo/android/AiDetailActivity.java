@@ -17,6 +17,7 @@ public final class AiDetailActivity extends BaseActivity implements NoteReposito
     @Override protected void onResume(){super.onResume();if(root!=null)render();}
     private void render(){Note n=repo.find(id);if(n==null){finish();return;}root.removeAllViews();
         LinearLayout bar=Ui.row(this);bar.addView(Ui.button(this,"‹ 返回",false,v->finish()));TextView gap=Ui.text(this,"",12,Ui.MUTED);bar.addView(gap,new LinearLayout.LayoutParams(0,1,1));bar.addView(Ui.button(this,"编辑原文",false,v->edit("")));bar.addView(Ui.button(this,"悬浮",true,v->requestOverlay(OverlayService.SHOW,id)));root.addView(bar);Ui.space(root,16);
+        TaskUi.button(this,root,id);
         root.addView(Ui.bold(this,n.displayTitle(),25,Ui.INK));Ui.space(root,6);
         String status=n.aiStatus+(n.aiRevision>0&&!AiDocument.current(n)?" · 原文已改变，以下是旧版本整理":"");root.addView(Ui.text(this,status,14,Ui.GREEN));if(!repo.error.isEmpty())root.addView(Ui.text(this,repo.error,14,Ui.MUTED));
         if(!n.aiError.isEmpty()){root.addView(Ui.text(this,n.aiError,14,Ui.MUTED));root.addView(Ui.button(this,"查看诊断记录",false,v->startActivity(new Intent(this,DiagnosticActivity.class))));}Ui.space(root,12);

@@ -50,7 +50,7 @@ public final class BackupArchive {
         }return remap;
     }
     public static void write(File target,JSONObject snapshot,File assetDirectory)throws Exception{
-        JSONObject root=new JSONObject(snapshot.toString()).put("schemaVersion",3).put("includesImageFiles",true);
+        JSONObject root=new JSONObject(snapshot.toString()).put("schemaVersion",4).put("includesImageFiles",true);
         Map<String,Attachment> assets=assets(root);byte[] data=jsonBytes(root);long total=data.length;JSONArray manifestAssets=new JSONArray();
         for(Attachment a:assets.values()){
             File file=new File(assetDirectory,a.id);if(!file.isFile()||file.length()!=a.bytes||!sha256(file).equals(a.sha256))throw new IOException("图片副本缺失或损坏，请先恢复完整备份："+a.id);
@@ -93,6 +93,6 @@ public final class BackupArchive {
             if(verified.size()!=references.size()||seen.size()!=verified.size()+2)throw new IOException("备份图片与清单不完整或不一致");return new Prepared(dir,root,true);
         }catch(Exception e){erase(dir);throw e;}
     }
-    public static void checkRoot(JSONObject root)throws Exception{int version=root.optInt("schemaVersion",1);if(version<1||version>3)throw new IOException("不支持的备份版本");JSONArray a=root.getJSONArray("notes");if(a.length()>10000)throw new IOException("单次最多导入10000条笔记");}
+    public static void checkRoot(JSONObject root)throws Exception{int version=root.optInt("schemaVersion",1);if(version<1||version>4)throw new IOException("不支持的备份版本");JSONArray a=root.getJSONArray("notes");if(a.length()>10000)throw new IOException("单次最多导入10000条笔记");}
     public static void erase(File f){if(f==null||!f.exists())return;File[] children=f.listFiles();if(children!=null)for(File c:children)erase(c);f.delete();}
 }

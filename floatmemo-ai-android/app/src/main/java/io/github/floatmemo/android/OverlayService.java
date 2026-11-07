@@ -61,12 +61,12 @@ public final class OverlayService extends Service implements NoteRepository.List
     private void reconcile(){
         if(!Settings.canDrawOverlays(this)){stopSelf();return;}
         Set<String> active=new HashSet<>();
-        for(Note n:repo.all())if(n.open)active.add(n.id);
+        for(Note n:repo.all())if(n.open&&NoteTasks.canFloat(n))active.add(n.id);
         for(String id:new ArrayList<>(windows.keySet())){
             if(hidden||!active.contains(id)){windows.remove(id).close();}
         }
         if(!hidden){
-            for(Note n:repo.all())if(n.open){
+            for(Note n:repo.all())if(n.open&&NoteTasks.canFloat(n)){
                 FloatingNoteWindow window=windows.get(n.id);
                 if(window==null){
                     try{window=new FloatingNoteWindow(this,repo,n);windows.put(n.id,window);}
@@ -85,7 +85,7 @@ public final class OverlayService extends Service implements NoteRepository.List
         PendingIntent open=PendingIntent.getActivity(this,1,new Intent(this,MainActivity.class),PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
         PendingIntent toggle=PendingIntent.getService(this,2,new Intent(this,OverlayService.class).setAction(TOGGLE),PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
         PendingIntent stop=PendingIntent.getService(this,3,new Intent(this,OverlayService.class).setAction(STOP),PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
-        int count=0;for(Note n:repo.all())if(n.open)count++;
+        int count=0;for(Note n:repo.all())if(n.open&&NoteTasks.canFloat(n))count++;
         return new Notification.Builder(this,CHANNEL).setSmallIcon(R.drawable.ic_note)
             .setContentTitle(hidden?"便签已隐藏":"FloatMemo · "+count+" 张悬浮便签")
             .setContentText("点击管理便签；可随时隐藏或停止")

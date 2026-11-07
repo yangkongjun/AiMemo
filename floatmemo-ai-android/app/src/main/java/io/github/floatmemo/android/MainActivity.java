@@ -22,7 +22,7 @@ public final class MainActivity extends BaseActivity implements NoteRepository.L
     private TextView permissionLabel, countLabel;
     private Spinner folderPicker;
     private String query = "";
-    private int folderIndex;
+    private int folderIndex;private int taskFilter;
     private boolean updatingPicker;
     private java.util.List<SearchEngine.Hit> aiHits;
     private TextView searchMode;
@@ -36,7 +36,7 @@ public final class MainActivity extends BaseActivity implements NoteRepository.L
 
     @Override public void onCreate(Bundle state) {
         super.onCreate(state); repo = NoteRepository.get(this);
-        if (state != null) { query = state.getString("query",""); folderIndex = state.getInt("folder",0);searchKey=state.getString("searchKey",""); }
+        if (state != null) { query = state.getString("query",""); folderIndex = state.getInt("folder",0);taskFilter=state.getInt("taskFilter",0);searchKey=state.getString("searchKey",""); }
         LinearLayout shell = Ui.column(this); Ui.insetActivity(this,shell,0);
         ScrollView page = new ScrollView(this); page.setFillViewport(true);
         shell.addView(page,new LinearLayout.LayoutParams(-1,-1));
@@ -82,13 +82,15 @@ public final class MainActivity extends BaseActivity implements NoteRepository.L
             public void onNothingSelected(AdapterView<?> p){}
         });
         root.addView(filter);
+        Spinner tasks=new Spinner(this);tasks.setAdapter(new ArrayAdapter<>(this,android.R.layout.simple_spinner_dropdown_item,new String[]{"全部状态","待办","已完成","普通便签"}));tasks.setSelection(taskFilter);tasks.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener(){public void onItemSelected(AdapterView<?> p,View v,int position,long id){taskFilter=position;renderCards();}public void onNothingSelected(AdapterView<?> p){}});root.addView(tasks);
+        root.addView(Ui.button(this,"多选当前列表",false,v->manage(null,false)));
         cards = Ui.column(this); root.addView(cards,new LinearLayout.LayoutParams(-1,-2));
         updateFolders(); renderCards();if(repo.hasPending())AiJobService.schedule(this);
     }
     @Override protected void onStart(){super.onStart();repo.observe(this);searches.observe(this);searchChanged();}
     @Override protected void onStop(){repo.removeObserver(this);searches.removeObserver(this);repo.flush();super.onStop();}
     @Override protected void onResume(){super.onResume();if(cards!=null){updateStatus();updateFolders();searchChanged();renderCards();}}
-    @Override protected void onSaveInstanceState(Bundle out){super.onSaveInstanceState(out);out.putString("query",query);out.putInt("folder",folderIndex);out.putString("searchKey",searchKey);}
+    @Override protected void onSaveInstanceState(Bundle out){super.onSaveInstanceState(out);out.putString("query",query);out.putInt("folder",folderIndex);out.putInt("taskFilter",taskFilter);out.putString("searchKey",searchKey);}
     @Override public void onNotesChanged(){updateStatus();updateFolders();searchChanged();renderCards();}
     private void updateStatus(){
         permissionLabel.setText(!repo.error.isEmpty() ? repo.error : Settings.canDrawOverlays(this)
@@ -107,14 +109,15 @@ public final class MainActivity extends BaseActivity implements NoteRepository.L
         List<String> folders=repo.folders();
         List<SearchEngine.Hit> hits=aiHits==null?SearchEngine.local(repo.all(),query):aiHits;
         for(SearchEngine.Hit hit:hits){
-            Note n=repo.find(hit.note.id);if(n==null)continue;
+            Note n=repo.find(hit.note.id);if(n==null||!NoteTasks.matches(n,taskFilter))continue;
             if(aiHits!=null&&n.revision!=hit.note.revision)continue;
             if(folderIndex==1&&!n.folder.isEmpty())continue;
             if(folderIndex>=2 && (folderIndex-2>=folders.size()||!n.folder.equals(folders.get(folderIndex-2))))continue;
             count++;
             LinearLayout card=Ui.column(this);int p=Ui.dp(this,16);card.setPadding(p,p,p,p);
-            card.setBackground(Ui.round(this,Ui.COLORS[n.color],18));
-            card.addView(Ui.bold(this,n.displayTitle(),18,Ui.INK));
+            card.setBackground(Ui.round(this,TaskUi.color(n),18));
+            card.addView(Ui.bold(this,n.displayTitle(),18,NoteTasks.done(n)?Ui.MUTED:Ui.INK));
+            card.addView(Ui.text(this,TaskUi.summary(this,n),12,NoteTasks.overdue(n,System.currentTimeMillis())?0xFFAF3030:Ui.GREEN));
             Ui.space(card,8);
             TextView body=Ui.text(this,hit.quote.isEmpty()?"写下第一句话…":hit.quote,14,Ui.INK);body.setMaxLines(3);card.addView(body);
             if(!query.trim().isEmpty())card.addView(Ui.text(this,hit.reason,12,Ui.GREEN));
@@ -125,9 +128,9 @@ public final class MainActivity extends BaseActivity implements NoteRepository.L
             LinearLayout bottom=Ui.row(this);
             String date=new SimpleDateFormat("MM/dd HH:mm",Locale.CHINA).format(new Date(n.updatedAt));
             bottom.addView(Ui.text(this,(n.folder.isEmpty()?"未分类":n.folder)+" · "+date,11,Ui.MUTED),new LinearLayout.LayoutParams(0,-2,1));
-            bottom.addView(Ui.button(this,"悬浮 ↗",false,v->requestOverlay(OverlayService.SHOW,n.id)));
+            bottom.addView(Ui.button(this,NoteTasks.done(n)?"恢复待办":n.task?"✓ 完成":"悬浮 ↗",false,v->{if(n.task)repo.editMetadata(n.id,x->{x.completedAt=NoteTasks.done(n)?0:System.currentTimeMillis();x.open=false;});else requestOverlay(OverlayService.SHOW,n.id);}));
             card.addView(bottom);card.setOnClickListener(v->startActivity(new Intent(this,AiDetailActivity.class).putExtra("noteId",n.id)));
-            card.setOnLongClickListener(v->{confirmDelete(n);return true;});
+            card.setOnLongClickListener(v->{manage(n.id,false);return true;});
             LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,-2);lp.bottomMargin=Ui.dp(this,12);cards.addView(card,lp);
         }
         countLabel.setText(getString(R.string.memo_count,count));
@@ -137,10 +140,9 @@ public final class MainActivity extends BaseActivity implements NoteRepository.L
         }
     }
     private void edit(String id){startActivity(new Intent(this,NoteEditorActivity.class).putExtra("noteId",id));}
-    private void confirmDelete(Note n){new AlertDialog.Builder(this).setTitle("删除便签？").setMessage(n.displayTitle())
-        .setNegativeButton("取消",null).setPositiveButton("删除",(d,w)->repo.delete(n.id)).show();}
+    private void manage(String selected,boolean trash){Intent intent=new Intent(this,NoteManageActivity.class).putExtra("selected",selected).putExtra("trash",trash).putExtra("taskFilter",taskFilter);if(!trash){if(aiHits!=null){java.util.ArrayList<String> ids=new java.util.ArrayList<>();for(SearchEngine.Hit hit:aiHits){Note current=repo.find(hit.note.id);if(current!=null&&current.revision==hit.note.revision)ids.add(current.id);}intent.putStringArrayListExtra("candidateIds",ids);}else intent.putExtra("query",query);List<String> fs=repo.folders();if(folderIndex==1)intent.putExtra("kind","folder").putExtra("value","");else if(folderIndex>=2&&folderIndex-2<fs.size())intent.putExtra("kind","folder").putExtra("value",fs.get(folderIndex-2));}startActivity(intent);}
     private void showMore(){
-        String[] options={"隐藏全部悬浮窗","停止悬浮服务","新建文件夹","删除文件夹","完整备份（含图片 ZIP）","使用说明","导入 ZIP / JSON 备份","批量整理未完成笔记","诊断记录","仅导出文字及元数据（JSON）"};
+        String[] options={"隐藏全部悬浮窗","停止悬浮服务","新建文件夹","删除文件夹","完整备份（含图片 ZIP）","使用说明","导入 ZIP / JSON 备份","批量整理尚未整理的笔记","诊断记录","仅导出文字及元数据（JSON）","批量管理","回收站"};
         new AlertDialog.Builder(this).setTitle("更多操作").setItems(options,(d,w)->{
             if(w==0||w==1){
                 if(!OverlayService.running){toast("当前没有悬浮服务");return;}
@@ -161,8 +163,9 @@ public final class MainActivity extends BaseActivity implements NoteRepository.L
             }else if(w==7){batch();
             }else if(w==8){startActivity(new Intent(this,DiagnosticActivity.class));
             }else if(w==9){new AlertDialog.Builder(this).setTitle("JSON不包含原图片").setMessage("该文件仅保存文字、整理内容、历史及附件信息；换手机恢复图片必须使用完整ZIP备份。").setNegativeButton("取消",null).setPositiveButton("仍导出JSON",(a,b)->startActivityForResult(new Intent(Intent.ACTION_CREATE_DOCUMENT).addCategory(Intent.CATEGORY_OPENABLE).setType("application/json").putExtra(Intent.EXTRA_TITLE,"FloatMemo-text-metadata.json"),EXPORT_JSON)).show();
+            }else if(w==10||w==11){manage(null,w==11);
             }else new AlertDialog.Builder(this).setTitle("让便签随处可见")
-                .setMessage("1. 新建便签并输入内容。\n2. 点“悬浮”，按提示授予权限。\n3. 拖动便签标题栏移动，拖右下角调整大小。\n4. 点“编辑”直接输入，点“完成”收起键盘。\n5. “隐藏”保留窗口状态，可从通知恢复；“×”只关闭该悬浮窗，不删除内容。\n\n内容自动保存到本机，没有云同步。卸载或清除应用数据会删除笔记。请在“更多 → 完整备份（含图片 ZIP）”中另存备份；重装后可导入。更新时优先直接覆盖安装。\n\n配置 AI 后，停止输入一段时间会安排后台整理。\n部分手机需在系统设置中允许后台运行。")
+                .setMessage("1. 新建便签并输入内容。\n2. 点“悬浮”，按提示授予权限。\n3. 拖动便签标题栏移动，拖右下角调整大小。\n4. 点“编辑”直接输入，点“收起”收起键盘。\n5. “隐藏”保留窗口状态，可从通知恢复；“×”只关闭该悬浮窗，不删除内容。\n\n内容自动保存到本机，没有云同步。卸载或清除应用数据会删除笔记。请在“更多 → 完整备份（含图片 ZIP）”中另存备份；重装后可导入。更新时优先直接覆盖安装。\n\n配置 AI 后，停止输入一段时间会安排后台整理。\n部分手机需在系统设置中允许后台运行。")
                 .setPositiveButton("知道了",null).show();
         }).show();
     }

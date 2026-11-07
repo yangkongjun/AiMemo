@@ -1,3 +1,19 @@
+# V0.4.0 Test1验证记录
+
+日期2026-11-07。测试分支feature/note-tasks-format-reminders，包名io.github.floatmemo.android，versionName 0.4.0-test1，versionCode 12。
+
+- 完整生产Java/资源经AAPT2、ECJ、D8编译，zipalign和原证书v2/v3签名通过。
+- 164项JVM测试通过，失败0；既有133项重跑，新增31项覆盖格式/Unicode区间、清单状态、编号续写、任务与AI状态分离、提醒代次及schema4含回收站原图备份。
+- APK资源表未压缩、4字节对齐（数据偏移3024）、ZIP CRC、必需文件、包名与版本、新Activity/Receiver及权限检查通过。证书与既有版一致，只核验升级身份条件。
+- 源码检查：元数据变动不排AI任务；回收站排除搜索/AI/悬浮；多选限制当前范围，过期AI结果不进入当前多选；通知/精确权限分步处理，完成/回收取消并更新代次。
+- 未运行：真机/模拟器、选字/横向滑动/软键盘/悬浮手势、实际覆盖安装/数据恢复、Android SQLite故障注入、系统通知/闹钟/Doze/重启/厂商省电、真实模型和Gradle lint。
+
+APK SHA256：`052acb2bb5c8b01e7faeb12daeb38630bb914eba4044541739cf4c56bf75f360`，143912字节。证书SHA256：`48c18d24b9bbe983674249919f73fc31fd29dfa55de23529c1f17f94136b3cd1`。
+
+[手机验收清单](../docs/releases/V0_4_0_Test1.md)、[机器记录](verification/v040_test1_checks.json)、[构建和测试日志](verification/build-v040-test1.log)。以下为历史版本验证，不能替代本次设备验收。
+
+---
+
 # V0.3.2验证记录
 
 日期2026-10-29。包名io.github.floatmemo.android，版本0.3.2-ai-preview，versionCode 11。

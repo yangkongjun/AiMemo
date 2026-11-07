@@ -1,0 +1,33 @@
+{
+  "date": "2026-11-07",
+  "version_name": "0.4.0-test1",
+  "version_code": 12,
+  "package": "io.github.floatmemo.android",
+  "branch": "feature/note-tasks-format-reminders",
+  "base_commit": "bb64680c6a27da4749dc2501b63d913c5253cb24",
+  "artifact": "FloatMemo_AI_Android_V0_4_0_Test1.apk",
+  "apk_bytes": 143912,
+  "apk_sha256": "052acb2bb5c8b01e7faeb12daeb38630bb914eba4044541739cf4c56bf75f360",
+  "certificate_sha256": "48c18d24b9bbe983674249919f73fc31fd29dfa55de23529c1f17f94136b3cd1",
+  "jvm_tests": 164,
+  "jvm_failures": 0,
+  "build": "AAPT2/ECJ/D8 production sources and resources passed",
+  "signature_v2": true,
+  "signature_v3": true,
+  "manifest_new_activity_receiver_permissions": true,
+  "apk_checks": {
+    "resources_uncompressed": true,
+    "resources_data_offset": 3024,
+    "resources_alignment": 4,
+    "zip_crc_valid": true
+  },
+  "not_run": [
+    "Android device or emulator",
+    "Touch selection and horizontal toolbar",
+    "Runtime SQLite failure injection",
+    "Actual alarms notifications reboot and forced stop",
+    "Cover install and data retention",
+    "Real model service",
+    "Gradle lint"
+  ]
+}

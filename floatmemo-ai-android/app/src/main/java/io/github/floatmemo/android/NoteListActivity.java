@@ -33,6 +33,7 @@ public final class NoteListActivity extends BaseActivity implements NoteReposito
         LinearLayout root=Ui.column(this);Ui.insetActivity(this,root,16);
         LinearLayout bar=Ui.row(this);
         bar.addView(Ui.button(this,"‹ 主题与标签",false,v->finish()));
+        bar.addView(Ui.button(this,"多选",false,v->manage(null)));
         View gap=new View(this);bar.addView(gap,new LinearLayout.LayoutParams(0,1,1));
         count=Ui.text(this,"",13,Ui.MUTED);bar.addView(count);root.addView(bar);
         Ui.space(root,22);
@@ -40,7 +41,7 @@ public final class NoteListActivity extends BaseActivity implements NoteReposito
         TextView heading=Ui.bold(this,("tag".equals(kind)?"# ":"")+(value.isEmpty()?"未分类":value),26,Ui.INK);
         heading.setMaxLines(3);heading.setEllipsize(TextUtils.TruncateAt.END);
         root.addView(heading);Ui.space(root,8);
-        root.addView(Ui.text(this,"按最近编辑排序 · 点开查看笔记",13,Ui.MUTED));Ui.space(root,18);
+        root.addView(Ui.text(this,"已完成置底 · 同状态按最近编辑排序",13,Ui.MUTED));Ui.space(root,18);
 
         FrameLayout body=new FrameLayout(this);root.addView(body,new LinearLayout.LayoutParams(-1,0,1));
         list=new ListView(this);list.setId(android.R.id.list);list.setSaveEnabled(false);list.setDivider(null);list.setDividerHeight(0);
@@ -51,6 +52,7 @@ public final class NoteListActivity extends BaseActivity implements NoteReposito
         empty.setGravity(android.view.Gravity.CENTER);empty.setPadding(Ui.dp(this,20),0,Ui.dp(this,20),0);
         body.addView(empty,new FrameLayout.LayoutParams(-1,-1));list.setEmptyView(empty);
         adapter=new Cards();list.setAdapter(adapter);
+        list.setOnItemLongClickListener((parent,view,position,id)->{manage(notes.get(position).id);return true;});
         list.setOnItemClickListener((parent,view,position,id)->{
             if(position<notes.size())startActivity(new Intent(this,AiDetailActivity.class).putExtra("noteId",notes.get(position).id));
         });
@@ -63,6 +65,7 @@ public final class NoteListActivity extends BaseActivity implements NoteReposito
         if(list!=null){rememberPosition();state.putString("noteAnchor",restoreId);state.putInt("noteTop",restoreTop);}
         super.onSaveInstanceState(state);
     }
+    private void manage(String selected){startActivity(new Intent(this,NoteManageActivity.class).putExtra("kind",kind).putExtra("value",value).putExtra("selected",selected));}
     private void rememberPosition(){
         int first=list.getFirstVisiblePosition();View child=list.getChildAt(0);
         if(child!=null&&first>=0&&first<notes.size()){restoreId=notes.get(first).id;restoreTop=child.getTop();}
@@ -98,16 +101,16 @@ public final class NoteListActivity extends BaseActivity implements NoteReposito
                 if(newline>=0)plain=plain.substring(newline+1).trim();
             }
             if(title.isEmpty())title=NoteBodyParser.ids(note.content).isEmpty()?"新便签":"图片笔记";
-            row.title.setText(NoteBodyParser.bounded(title,240));
+            row.title.setText(NoteBodyParser.bounded(title,240));row.title.setTextColor(NoteTasks.done(note)?Ui.MUTED:Ui.INK);row.title.setAlpha(NoteTasks.done(note)?.6f:1f);
             String preview=NoteBodyParser.bounded(plain.replaceAll("\\s+"," "),240);
             row.preview.setText(preview);row.preview.setVisibility(preview.isEmpty()?View.GONE:View.VISIBLE);
             List<String> tags=new ArrayList<>();for(String tag:note.tags.split("、"))if(!tag.trim().isEmpty())tags.add("# "+tag.trim());
             String labels=NoteBodyParser.bounded(String.join("   ",tags),240);
             row.tags.setText(labels);row.tags.setVisibility(labels.isEmpty()?View.GONE:View.VISIBLE);
             int images=NoteBodyParser.ids(note.content).size();
-            String meta=(note.folder.isEmpty()?"未分类":NoteBodyParser.bounded(note.folder,60))+" · "+date.format(new Date(note.updatedAt));
+            String meta=TaskUi.summary(NoteListActivity.this,note)+" · "+(note.folder.isEmpty()?"未分类":NoteBodyParser.bounded(note.folder,60))+" · "+date.format(new Date(note.updatedAt));
             if(images>0)meta+=" · "+images+" 张图片";
-            row.meta.setText(meta);
+            row.meta.setText(meta);row.meta.setTextColor(NoteTasks.overdue(note,System.currentTimeMillis())?0xFFAF3030:Ui.MUTED);
             row.outer.setContentDescription(row.title.getText()+(preview.isEmpty()?"":"，"+preview)+(labels.isEmpty()?"":"，"+labels)+"，"+meta+"，点开查看笔记");
             return recycled;
         }

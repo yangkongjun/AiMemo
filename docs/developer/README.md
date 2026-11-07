@@ -1,7 +1,8 @@
 # FloatMemo AI 安卓开发文档入口
 
-当前源码是本仓库floatmemo-ai分支的 [floatmemo-ai-android工程](../../floatmemo-ai-android)，不必从旧归档重新建立开发基线。版本、功能与边界以 [应用说明](../../floatmemo-ai-android/README.md) 和 [当前交接](../PROJECT_HANDOFF.md) 为准。
+当前测试源码是本仓库feature/note-tasks-format-reminders分支的 [floatmemo-ai-android工程](../../floatmemo-ai-android)，不必从旧归档重新建立开发基线。版本、功能与边界以 [应用说明](../../floatmemo-ai-android/README.md) 和 [当前交接](../PROJECT_HANDOFF.md) 为准。
 
+- [V0.4.0 Test1开发补充](V0_4_0_Test1_Development.md)：局部格式、待办、提醒、批量与备份兼容性。
 - [V0.3.x使用与开发补充](V0_3_0_Usage_And_Development.md)：预算、图文、备份、搜索、流式与卡片入口。
 - [当前验证及未测项目](../../floatmemo-ai-android/VALIDATION.md)：区分本机检查与手机验收。
 - [未完成想法提醒](../../floatmemo-ai-android/REQUIREMENT_STATUS.md#未完成想法提醒)：保留待做目标，不等于已排期。
