@@ -1,3 +1,15 @@
+# V0.4.0 Test2 验证记录
+
+2026-11-13。生产 Java 与资源编译通过，164 项原有 JVM 测试及 6 项新增提醒回归通过。覆盖提前与逾期分别触发、同一截止时间去重、完成和回收站拦截、改期、旧数据和备份导入。
+
+APK 包名 io.github.floatmemo.android，versionName 0.4.0-test2，versionCode 13，大小 148008 字节。ZIP CRC、资源表 4 字节对齐、原证书及 v2/v3 签名检查通过。
+
+APK SHA-256：`75e024f46c6f2c65a27d44b5078c8b2b54eddfb2aee669ad226d0a5aa1d7a45f`。
+
+真机覆盖安装、通知投递、锁屏及勿扰下声音和精确提醒权限仍待验证。见 [Test2 操作说明](../docs/releases/V0_4_0_Test2.md)。
+
+---
+
 # V0.4.0 Test1验证记录
 
 日期2026-11-07。测试分支feature/note-tasks-format-reminders，包名io.github.floatmemo.android，versionName 0.4.0-test1，versionCode 12。

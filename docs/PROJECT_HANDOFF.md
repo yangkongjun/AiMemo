@@ -1,6 +1,6 @@
 # FloatMemo AI 当前交接
 
-核对日期：2026-11-07。本页描述当前安卓工程；版本以 [app/build.gradle](../floatmemo-ai-android/app/build.gradle) 为准，本分支交付为 **V0.4.0 Test1（versionName 0.4.0-test1，versionCode 12）**；测试分支为feature/note-tasks-format-reminders，floatmemo-ai基线bb64680保持V0.3.2。测试版操作与边界见 [发布记录](releases/V0_4_0_Test1.md)，不再把旧版本并列为“当前”。
+核对日期：2026-11-13。本页描述当前安卓工程；版本以 [app/build.gradle](../floatmemo-ai-android/app/build.gradle) 为准，本分支交付为 **V0.4.0 Test2（versionName 0.4.0-test2，versionCode 13）**；测试分支为feature/note-tasks-format-reminders，floatmemo-ai基线bb64680保持V0.3.2。测试版操作与边界见 [发布记录](releases/V0_4_0_Test2.md)，不再把旧版本并列为“当前”。
 
 ## 从这里继续
 
@@ -27,7 +27,7 @@ Java原生Android，minSdk26、compile/target35、JDK17、AGP8.7.3、Gradle8.9�
 
 本次明确批准选中文字后横向滑动工具栏，以及此前讨论的清单、编号、待办/完成、截止提醒、当前范围多选和回收站。TaskUi/NoteTasks负责状态；TextFormat/TextStyleSpans/FormatToolbar/BodyEditing负责局部样式与列表；ReminderScheduler/Receiver负责系统提醒；NoteManageActivity负责批量。
 
-格式、勾选和任务元数据独立于AI正文指纹。备份schemaVersion4可读旧版1–3，包含回收站及引用原图；导入新便签关闭提醒，保留截止日期；回收站恢复未发且截止前的提醒会重排。开发边界见 [开发补充](developer/V0_4_0_Test1_Development.md)。
+格式、勾选和任务元数据独立于AI正文指纹。备份schemaVersion4可读旧版1–3，包含回收站及引用原图；导入新便签关闭提醒，保留截止日期；回收站恢复会重排有效且未发送的提醒。Test2 为两个阶段分别保存通知方式和发送时间，到期时仍未完成才发送逾期通知。开发边界见 [开发补充](developer/V0_4_0_Test1_Development.md)。
 
 ## 开发与交付
 
@@ -38,7 +38,7 @@ Java原生Android，minSdk26、compile/target35、JDK17、AGP8.7.3、Gradle8.9�
 
 ## 验证边界
 
-本次完整生产编译、164项JVM回归、APK签名和结构检查通过，见 [VALIDATION](../floatmemo-ai-android/VALIDATION.md) 与 [机器记录](../floatmemo-ai-android/verification/v040_test1_checks.json)。新增31项测试覆盖格式映射、清单/编号、状态与提醒代次、schema4备份。手机界面、实际系统闹钟/通知/覆盖安装均未验收。V0.3.2的133项为历史基线。
+Test2 完成生产编译、170 项 JVM 回归、APK 签名与结构检查。新增 6 项测试覆盖两阶段独立触发、过期投递、完成和删除、改期去重、持久化和旧版升级默认值。手机通知、响铃和覆盖安装待测。见 [VALIDATION](../floatmemo-ai-android/VALIDATION.md)。
 
 仍待验证：真机覆盖升级与数据恢复、图文/卡片/旋转/返回/大字体等交互、Android实际SQLite与文件故障、真实模型兼容性与长请求、固定笔记集的召回/忠实度/纠正负担/费用。本环境未确认用户手机的现役版本，也未证实此前偶发断连的唯一原因。
 

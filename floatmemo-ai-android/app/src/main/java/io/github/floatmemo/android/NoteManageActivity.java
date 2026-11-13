@@ -29,7 +29,7 @@ public final class NoteManageActivity extends BaseActivity implements NoteReposi
   rows.clear();Set<String> visible=new HashSet<>();for(Note n:source)if(matches(n)){rows.add(n);visible.add(n.id);}selected.retainAll(visible);adapter.notifyDataSetChanged();labels();}
  private void labels(){count.setText(rows.size()+" 条 · 已选 "+selected.size()+" 条");action.setText((trash?"永久删除":"移入回收站")+"（"+selected.size()+"）");action.setEnabled(!selected.isEmpty());if(restore!=null){restore.setText("恢复（"+selected.size()+"）");restore.setEnabled(!selected.isEmpty());}}
  private void perform(boolean recover){final Set<String> ids=new LinkedHashSet<>(selected);if(ids.isEmpty())return;
-  String title=recover?"恢复所选便签？":trash?"永久删除所选便签？":"移入回收站？";String message=ids.size()+" 条便签。"+(recover?"原状态保留；截止已过不补发，截止前未发送的提醒会重新安排。":trash?"便签及其整理历史将无法在应用中恢复；已另存的备份不受影响。":"可以在首页“更多 → 回收站”恢复。");
+  String title=recover?"恢复所选便签？":trash?"永久删除所选便签？":"移入回收站？";String message=ids.size()+" 条便签。"+(recover?"原状态保留；未发送的提醒会按当前截止时间和提醒设置重新安排。":trash?"便签及其整理历史将无法在应用中恢复；已另存的备份不受影响。":"可以在首页“更多 → 回收站”恢复。");
   new AlertDialog.Builder(this).setTitle(title).setMessage(message).setNegativeButton("取消",null).setPositiveButton(recover?"恢复":trash?"永久删除":"移入回收站",(d,w)->{Set<String> visible=new HashSet<>();for(Note n:rows)visible.add(n.id);ids.retainAll(visible);boolean ok=trash&&!recover?repo.purgeMany(ids):repo.trashMany(ids,recover);if(ok){selected.clear();refresh();Toast.makeText(this,"操作完成",Toast.LENGTH_SHORT).show();}else Toast.makeText(this,repo.error,Toast.LENGTH_LONG).show();}).show();
  }
  private final class Cards extends BaseAdapter {

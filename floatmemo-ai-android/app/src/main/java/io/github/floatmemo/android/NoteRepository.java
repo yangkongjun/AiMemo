@@ -98,9 +98,8 @@ public final class NoteRepository {
     public synchronized boolean editMetadata(String id,Mutation fn){
         Note old=notes.get(id);if(!NoteTasks.active(old))return false;Note n=old.copy();
         try{fn.apply(n);if(!n.content.equals(old.content)||!n.title.equals(old.title))throw new IllegalArgumentException("此操作只能修改便签状态或格式");TextFormat.validate(n);
-            boolean timing=n.task!=old.task||n.completedAt!=old.completedAt||n.dueAt!=old.dueAt||n.reminderAt!=old.reminderAt;
-            if(!n.task){n.completedAt=0;n.dueAt=0;n.reminderAt=0;}if(n.completedAt>0)n.open=false;
-            if(timing){n.reminderGeneration=old.reminderGeneration+1;if(n.dueAt!=old.dueAt||n.reminderAt!=old.reminderAt)n.reminderFiredAt=0;}
+            boolean timing = NoteTasks.updateReminderGeneration(old, n);
+            if (n.completedAt > 0) n.open = false;
             n.updatedAt=System.currentTimeMillis();persist(n);notes.put(id,n);error="";changed();if(timing)ReminderScheduler.schedule(context,n);return true;
         }catch(Exception e){error="操作未保存，请检查存储空间后重试";changed();return false;}
     }

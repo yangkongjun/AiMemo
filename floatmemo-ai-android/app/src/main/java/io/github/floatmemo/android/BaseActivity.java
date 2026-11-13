@@ -67,7 +67,10 @@ public abstract class BaseActivity extends Activity {
         super.onRequestPermissionsResult(code,permissions,results);
         if (code == 71 && pendingAction != null && Settings.canDrawOverlays(this)) continueOverlay();
         if (code == 93) {
-            if (results.length > 0 && results[0] == PackageManager.PERMISSION_GRANTED) TaskUi.permissions(this);
+            if (results.length > 0 && results[0] == PackageManager.PERMISSION_GRANTED) {
+                ReminderScheduler.reschedule(this);
+                TaskUi.permissions(this);
+            }
             else Toast.makeText(this,"提醒已保存，但通知权限尚未开启；可在任务/提醒中重新检查权限",Toast.LENGTH_LONG).show();
         }
     }
