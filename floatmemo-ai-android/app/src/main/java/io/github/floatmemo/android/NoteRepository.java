@@ -88,7 +88,7 @@ public final class NoteRepository {
             }else if(AiDocument.current(n)){n.aiRevision=n.revision;}
             else if(!n.aiStatus.equals("等待整理")&&!n.aiStatus.equals("整理中")&&!n.aiJson.isEmpty()&&!AiDocument.validQuotes(n.aiJson,n.content)){n.aiStatus="原文引用位置已改变";}
         }
-        if(!before.folder.equals(n.folder)||!before.tags.equals(n.tags)){try{journal(before);}catch(Exception e){error="纠正历史保存失败";}}
+        if(!before.folder.equals(n.folder)||!before.tags.equals(n.tags)){try{journal(before,before.tags.equals(n.tags)?"folder":"");}catch(Exception e){error="纠正历史保存失败";}}
         if(!before.folder.equals(n.folder))n.folderLocked=true;
         if(!before.tags.equals(n.tags))n.tagsLocked=true;
         n.updatedAt=System.currentTimeMillis();store(n);
@@ -122,7 +122,7 @@ public final class NoteRepository {
     public synchronized void setAllOpen(boolean open){for(Note n:notes.values()){n.open=open&&NoteTasks.canFloat(n);store(n);}}
     public synchronized void flush(){for(Note n:notes.values())try{persist(n);}catch(Exception e){error="保存失败，请导出备份";}}
     public synchronized void queue(String id,boolean unlock){Note n=notes.get(id);if(!NoteTasks.active(n)||NoteBodyParser.text(n.content).trim().isEmpty())return;
-        if(unlock){try{journal(n);}catch(Exception e){error="纠正历史保存失败";changed();return;}n.aiLocked=false;}if(n.aiLocked)return;n.aiGeneration++;n.aiStatus="等待整理";n.aiError="";n.attempts=0;store(n);AiJobService.schedule(context);}
+        if(unlock){try{journal(n,"ai");}catch(Exception e){error="纠正历史保存失败";changed();return;}n.aiLocked=false;}if(n.aiLocked)return;n.aiGeneration++;n.aiStatus="等待整理";n.aiError="";n.attempts=0;store(n);AiJobService.schedule(context);}
     public synchronized Note claim(){for(Note n:notes.values())if(NoteTasks.active(n)&&n.aiStatus.equals("等待整理")&&!n.aiLocked&&!NoteBodyParser.text(n.content).trim().isEmpty()&&System.currentTimeMillis()-n.updatedAt>=5000){
         n.aiStatus="整理中";try{snapshot(n);}catch(Exception e){n.aiStatus="整理失败";n.aiError="保存来源版本失败";store(n);return null;}store(n);return n.copy();}return null;}
     public synchronized boolean hasPending(){for(Note n:notes.values())if(NoteTasks.active(n)&&n.aiStatus.equals("等待整理")&&!n.aiLocked&&!NoteBodyParser.text(n.content).trim().isEmpty())return true;return false;}
@@ -134,11 +134,142 @@ public final class NoteRepository {
             if(!n.folderLocked&&folders.contains(n.topicSuggestion))n.folder=n.topicSuggestion;
             if(!n.tagsLocked){JSONArray a=j.optJSONArray("tags");List<String> tags=new ArrayList<>();if(a!=null)for(int i=0;i<a.length();i++)tags.add(a.getString(i));n.tags=String.join("、",tags);}
         }catch(Exception ignored){return false;}store(n);return true;}
-    private void journal(Note n)throws Exception{ContentValues v=new ContentValues();v.put("noteId",n.id);v.put("beforeData",n.toJson().toString());v.put("created",System.currentTimeMillis());db.insertOrThrow("edits",null,v);}
-    public synchronized void editAi(String id,long expected,String json)throws Exception{Note n=notes.get(id);if(n==null||n.revision!=expected||!AiDocument.current(n))throw new Exception("原文已改变，请刷新后重新整理");journal(n);n.aiJson=json;n.aiGeneration++;n.aiLocked=true;n.reviewed=true;n.aiStatus="已人工修正";store(n);}
-    public synchronized boolean undoEdit(String id){Note n=notes.get(id);if(n==null)return false;try(Cursor c=db.rawQuery("SELECT id,beforeData FROM edits WHERE noteId=? ORDER BY id DESC LIMIT 1",new String[]{id})){if(!c.moveToFirst())return false;Note old=Note.fromJson(new JSONObject(c.getString(1)));n.folder=old.folder;n.tags=old.tags;n.folderLocked=old.folderLocked;n.tagsLocked=old.tagsLocked;n.aiJson=old.aiJson;n.aiLocked=old.aiLocked;n.reviewed=old.reviewed;n.aiStatus=n.revision==old.aiRevision?old.aiStatus:"原文已更新";n.aiRevision=old.aiRevision;n.aiSourceHash=old.aiSourceHash;n.aiGeneration++;if(AiDocument.current(n))n.aiRevision=n.revision;db.delete("edits","id=?",new String[]{c.getString(0)});store(n);return true;}catch(Exception e){return false;}}
+    private static final String EDIT_SCOPE = "editScope";
+    private static final String TAG_EDIT = "tags";
+
+    private void journal(Note note, String scope) throws Exception {
+        ContentValues values = new ContentValues();
+        values.put("noteId", note.id);
+        values.put("beforeData", note.toJson().put(EDIT_SCOPE, scope).toString());
+        values.put("created", System.currentTimeMillis());
+        db.insertOrThrow("edits", null, values);
+    }
+
+    public synchronized boolean editTags(String id, String expectedTags, boolean expectedLocked, String tags) {
+        Note current = notes.get(id);
+        if (!NoteTasks.active(current) || !current.tags.equals(expectedTags) || current.tagsLocked != expectedLocked) {
+            error = "标签已变化，请重新打开修改标签";
+            return false;
+        }
+        if (current.tags.equals(tags) && current.tagsLocked) return true;
+
+        Note edited = current.copy();
+        edited.tags = tags;
+        edited.tagsLocked = true;
+        return commitTagEdit(current, edited, null);
+    }
+
+    public synchronized boolean hasTagUndo(String id) {
+        try (Cursor cursor = editHistory(id)) {
+            while (cursor.moveToNext()) {
+                if (TAG_EDIT.equals(new JSONObject(cursor.getString(1)).optString(EDIT_SCOPE))) return true;
+            }
+        } catch (Exception ignored) {}
+        return false;
+    }
+
+    public synchronized boolean undoTags(String id) {
+        Note current = notes.get(id);
+        if (!NoteTasks.active(current)) return false;
+        try (Cursor cursor = editHistory(id)) {
+            while (cursor.moveToNext()) {
+                JSONObject entry = new JSONObject(cursor.getString(1));
+                if (!TAG_EDIT.equals(entry.optString(EDIT_SCOPE))) continue;
+                Note restored = current.copy();
+                restored.tags = entry.getString("tags");
+                restored.tagsLocked = entry.getBoolean("tagsLocked");
+                return commitTagEdit(current, restored, cursor.getString(0));
+            }
+        } catch (Exception e) {
+            error = "标签撤回失败，原标签已保留";
+            return false;
+        }
+        error = "没有可撤回的标签修改";
+        return false;
+    }
+
+    private boolean commitTagEdit(Note before, Note after, String undoId) {
+        try {
+            db.beginTransaction();
+            try {
+                if (undoId == null) journal(before, TAG_EDIT);
+                else db.delete("edits", "id=?", new String[]{undoId});
+                after.updatedAt = System.currentTimeMillis();
+                persist(after);
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+            }
+        } catch (Exception e) {
+            error = undoId == null ? "标签保存失败，原标签已保留" : "标签撤回失败，原标签已保留";
+            return false;
+        }
+        notes.put(after.id, after);
+        trackSearch(after);
+        error = "";
+        changed();
+        return true;
+    }
+
+    private Cursor editHistory(String id) {
+        return db.rawQuery("SELECT id,beforeData FROM edits WHERE noteId=? ORDER BY id DESC", new String[]{id});
+    }
+
+    public synchronized void editAi(String id,long expected,String json)throws Exception{Note n=notes.get(id);if(n==null||n.revision!=expected||!AiDocument.current(n))throw new Exception("原文已改变，请刷新后重新整理");journal(n,"ai");n.aiJson=json;n.aiGeneration++;n.aiLocked=true;n.reviewed=true;n.aiStatus="已人工修正";store(n);}
+
+    public synchronized boolean undoEdit(String id) {
+        Note current = notes.get(id);
+        if (!NoteTasks.active(current)) return false;
+        boolean newerTagEdit = false;
+        try (Cursor cursor = editHistory(id)) {
+            while (cursor.moveToNext()) {
+                JSONObject entry = new JSONObject(cursor.getString(1));
+                String scope = entry.optString(EDIT_SCOPE);
+                if (TAG_EDIT.equals(scope)) {
+                    newerTagEdit = true;
+                    continue;
+                }
+                Note old = Note.fromJson(entry);
+                Note restored = current.copy();
+                if (!scope.equals("ai")) {
+                    restored.folder = old.folder;
+                    restored.folderLocked = old.folderLocked;
+                }
+                if (!newerTagEdit && scope.isEmpty()) {
+                    restored.tags = old.tags;
+                    restored.tagsLocked = old.tagsLocked;
+                }
+                if (!scope.equals("folder")) {
+                    restored.aiJson = old.aiJson;
+                    restored.aiLocked = old.aiLocked;
+                    restored.reviewed = old.reviewed;
+                    restored.aiStatus = restored.revision == old.aiRevision ? old.aiStatus : "原文已更新";
+                    restored.aiRevision = old.aiRevision;
+                    restored.aiSourceHash = old.aiSourceHash;
+                    restored.aiGeneration++;
+                    if (AiDocument.current(restored)) restored.aiRevision = restored.revision;
+                }
+                db.beginTransaction();
+                try {
+                    persist(restored);
+                    db.delete("edits", "id=?", new String[]{cursor.getString(0)});
+                    db.setTransactionSuccessful();
+                } finally {
+                    db.endTransaction();
+                }
+                notes.put(id, restored);
+                trackSearch(restored);
+                error = "";
+                changed();
+                return true;
+            }
+        } catch (Exception e) {
+            error = "纠正撤回失败，原内容已保留";
+        }
+        return false;
+    }
     public synchronized String exportJson()throws Exception{
-        JSONObject r=new JSONObject().put("schemaVersion",4).put("includesImageFiles",false);JSONArray ns=new JSONArray();for(Note n:notes.values())ns.put(n.toJson());
+        JSONObject r=new JSONObject().put("schemaVersion",BackupArchive.SCHEMA_VERSION).put("includesImageFiles",false);JSONArray ns=new JSONArray();for(Note n:notes.values())ns.put(n.toJson());
         r.put("notes",ns).put("folders",new JSONArray(folders));
         JSONArray hs=new JSONArray(),es=new JSONArray();try(Cursor c=db.rawQuery("SELECT data FROM history",null)){while(c.moveToNext())hs.put(new JSONObject(c.getString(0)));}
         try(Cursor c=db.rawQuery("SELECT noteId,beforeData,created FROM edits",null)){while(c.moveToNext())es.put(new JSONObject().put("noteId",c.getString(0)).put("before",new JSONObject(c.getString(1))).put("created",c.getLong(2)));}
@@ -170,7 +301,7 @@ public final class NoteRepository {
         JSONArray previous=new JSONArray(meta("import:"+fingerprint).isEmpty()?"[]":meta("import:"+fingerprint));
         Map<String,JSONObject> receipts=new HashMap<>();for(int i=0;i<previous.length();i++){JSONObject e=previous.getJSONObject(i);receipts.put(e.getString("original"),e);}
         JSONArray newReceipt=new JSONArray();Set<String> seenIds=new HashSet<>();
-        JSONObject r=new JSONObject(text);int version=r.optInt("schemaVersion",1);if(version<1||version>4)throw new Exception("不支持的备份版本");
+        JSONObject r=new JSONObject(text);int version=r.optInt("schemaVersion",1);if(version<1||version>BackupArchive.SCHEMA_VERSION)throw new Exception("不支持的备份版本");
         JSONArray ns=r.getJSONArray("notes"),fs=r.optJSONArray("folders");if(ns.length()>10000)throw new Exception("单次最多导入10000条");
         List<Note> incoming=new ArrayList<>();Map<String,String> remap=new HashMap<>();
         for(int i=0;i<ns.length();i++){
@@ -191,7 +322,7 @@ public final class NoteRepository {
             // Restore correction history only for newly imported notes, so repeated imports do not duplicate edits.
             Set<String> importedIds=new HashSet<>();for(Note n:incoming)importedIds.add(n.id);
             JSONArray es=r.optJSONArray("edits");if(es!=null)for(int i=0;i<es.length();i++){JSONObject e=es.getJSONObject(i);String target=remap.getOrDefault(e.getString("noteId"),e.getString("noteId"));if(!importedIds.contains(target))continue;
-                Note before=Note.fromJson(e.getJSONObject("before"));before.id=target;ContentValues v=new ContentValues();v.put("noteId",target);v.put("beforeData",before.toJson().toString());v.put("created",e.optLong("created",0));db.insertOrThrow("edits",null,v);}
+                JSONObject entry=e.getJSONObject("before");Note before=Note.fromJson(entry);before.id=target;ContentValues v=new ContentValues();v.put("noteId",target);v.put("beforeData",before.toJson().put(EDIT_SCOPE,entry.optString(EDIT_SCOPE)).toString());v.put("created",e.optLong("created",0));db.insertOrThrow("edits",null,v);}
             meta("folders",new JSONArray(folders).toString());meta("import:"+fingerprint,newReceipt.toString());if(!transactionId.isEmpty())meta("assetTxn:"+transactionId,"committed");db.setTransactionSuccessful();
         }catch(Exception e){folders.clear();folders.addAll(oldFolders);throw e;}finally{db.endTransaction();}
         for(Note n:incoming){AiDocument.migrateFingerprint(n);notes.put(n.id,n);trackSearch(n);}changed();return incoming.size();

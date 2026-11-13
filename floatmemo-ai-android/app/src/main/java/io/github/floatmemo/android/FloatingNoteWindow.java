@@ -60,7 +60,6 @@ public final class FloatingNoteWindow {
         body.setInputType(android.text.InputType.TYPE_CLASS_TEXT|android.text.InputType.TYPE_TEXT_FLAG_MULTI_LINE|android.text.InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
         body.setTextIsSelectable(true);body.setFocusable(false);body.setFocusableInTouchMode(false);
         BodyEditing.attach(body,repo,id,()->binding,()->editing);
-        formatBar=new FormatToolbar(context,body,repo,id);content.addView(formatBar);
         content.addView(body,new LinearLayout.LayoutParams(-1,0,1));
         previewScroll=new ScrollView(context);preview=new NotePreviewRenderer(context);
         preview.setPadding(Ui.dp(context,12),Ui.dp(context,10),Ui.dp(context,12),Ui.dp(context,10));
@@ -71,7 +70,8 @@ public final class FloatingNoteWindow {
         footer.addView(previewButton);
         footer.addView(control("插图↗",v->{setEditing(false);context.startActivity(new android.content.Intent(context,NoteEditorActivity.class).putExtra("noteId",id).addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK));}),new LinearLayout.LayoutParams(0,-2,1));
         resizeHandle=control("◢",v->{});resizeHandle.setContentDescription("拖动调整便签大小");resizeHandle.setOnTouchListener(new DragListener(true));footer.addView(resizeHandle);
-        content.addView(footer,new LinearLayout.LayoutParams(-1,Ui.dp(context,40)));
+        formatBar=new FormatToolbar(context,body,repo,id,footer);
+        content.addView(formatBar,new LinearLayout.LayoutParams(-1,Ui.dp(context,48)));
         root.addView(content,new LinearLayout.LayoutParams(-1,0,1));
         refresh(note);fitScreen();
         manager.addView(root,params);attached=true;
@@ -91,7 +91,7 @@ public final class FloatingNoteWindow {
             binding=true;int cursor=body.getSelectionStart();body.setText(note.content);
             if(editing)body.setSelection(Math.max(0,Math.min(cursor,body.length())));binding=false;
         }
-        TextStyleSpans.apply(body.getText(),note);
+        TextStyleSpans.apply(body,note);
         if(previewing)preview.render(note);
         content.setVisibility(note.compact?View.GONE:View.VISIBLE);
         editButton.setVisibility(note.compact?View.GONE:View.VISIBLE);
@@ -99,7 +99,7 @@ public final class FloatingNoteWindow {
         updateContentMode();
     }
     private void updateContentMode(){
-        if(previewing||!editing)formatBar.setVisibility(View.GONE);else formatBar.refresh();
+        formatBar.setFormattingEnabled(!previewing&&editing&&!current.compact);
         body.setVisibility(previewing?View.GONE:View.VISIBLE);
         previewScroll.setVisibility(previewing?View.VISIBLE:View.GONE);
         if(previewing)preview.render(current);
@@ -116,7 +116,7 @@ public final class FloatingNoteWindow {
                 .showSoftInput(body,InputMethodManager.SHOW_IMPLICIT);},100);
         }else{
             ((InputMethodManager)context.getSystemService(Context.INPUT_METHOD_SERVICE)).hideSoftInputFromWindow(body.getWindowToken(),0);
-            body.clearFocus();body.setFocusable(false);body.setFocusableInTouchMode(false);
+            body.clearFocus();body.setFocusable(false);body.setFocusableInTouchMode(false);updateContentMode();
             params.flags|=WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;editButton.setText("编辑");updateLayout();repo.flush();
         }
     }

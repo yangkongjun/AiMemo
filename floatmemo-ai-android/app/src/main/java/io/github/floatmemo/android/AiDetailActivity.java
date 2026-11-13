@@ -26,7 +26,16 @@ public final class AiDetailActivity extends BaseActivity implements NoteReposito
         actions.addView(Ui.button(this,"撤销纠正",false,v->{if(!repo.undoEdit(id))toast("没有可撤销的内容纠正");}));root.addView(actions);Ui.space(root,18);
         root.addView(Ui.bold(this,"主题与标签",18,Ui.INK));root.addView(Ui.text(this,"主题："+(n.folder.isEmpty()?"未分类":n.folder)+(n.folderLocked?" · 人工指定":"")+"\n标签："+(n.tags.isEmpty()?"暂无":n.tags)+(n.tagsLocked?" · 人工指定":""),15,Ui.INK));
         if(!n.topicSuggestion.isEmpty()&&!n.topicSuggestion.equals(n.folder))root.addView(Ui.text(this,"AI 建议主题："+n.topicSuggestion,14,Ui.MUTED));
-        LinearLayout edits=Ui.row(this);edits.addView(Ui.button(this,"修改主题",false,v->folder(n)));edits.addView(Ui.button(this,"修改标签",false,v->tags(n)));root.addView(edits);Ui.space(root,18);
+        LinearLayout edits=Ui.row(this);edits.addView(Ui.button(this,"修改主题",false,v->folder(n)));edits.addView(Ui.button(this,"修改标签",false,v->tags(n)));Button undoTags = Ui.button(this,"撤回标签",false,v->{
+            if(repo.undoTags(id)) toast("已撤回上一次标签修改");
+            else toast(repo.error.isEmpty()?"没有可撤回的标签修改":repo.error);
+        });
+        undoTags.setEnabled(repo.hasTagUndo(id));
+        edits.addView(undoTags);
+        HorizontalScrollView tagActions = new HorizontalScrollView(this);
+        tagActions.setHorizontalScrollBarEnabled(false);
+        tagActions.addView(edits);
+        root.addView(tagActions);Ui.space(root,18);
         if(n.aiJson.isEmpty()){root.addView(Ui.text(this,"原文已保存在本机。配置并启用 AI 后，可以查看整理出的要点及原文依据。",15,Ui.MUTED));}
         else try{JSONObject j=new JSONObject(n.aiJson);String proposed=j.optString("title","");if(!proposed.isEmpty()){root.addView(Ui.text(this,"建议标题："+proposed,14,Ui.MUTED));Ui.space(root,10);}
             if(j.optInt("parts",1)>1)root.addView(Ui.text(this,"长笔记按 "+j.optInt("parts")+" 段分别整理，概括按段展示。",13,Ui.MUTED));
@@ -56,6 +65,19 @@ public final class AiDetailActivity extends BaseActivity implements NoteReposito
             .setPositiveButton("保存并锁定",(d,w)->{String value=text.getText().toString().trim();if(value.isEmpty()){toast("内容不能为空");return;}try{JSONObject j=new JSONObject(n.aiJson);j.getJSONArray(key).getJSONObject(index).put("text",value).put("manual",true);repo.editAi(id,n.revision,j.toString());}catch(Exception e){toast("纠正未保存，原文可能已改变，请刷新后重试");}}).show();}
     private void folder(Note n){EditText text=Ui.input(this,"主题名称，留空设为未分类");text.setText(n.topicSuggestion.isEmpty()?n.folder:n.topicSuggestion);
         new AlertDialog.Builder(this).setTitle("修改主题").setView(text).setNegativeButton("取消",null).setPositiveButton("保存",(d,w)->{String value=text.getText().toString().trim();if(value.length()>60){toast("名称最多60字");return;}if(!value.isEmpty())repo.addFolder(value);repo.update(id,x->{x.folder=value;x.folderLocked=true;});}).show();}
-    private void tags(Note n){EditText text=Ui.input(this,"用顿号或逗号分隔标签");text.setText(n.tags);
-        new AlertDialog.Builder(this).setTitle("修改标签").setView(text).setNegativeButton("取消",null).setPositiveButton("保存",(d,w)->{LinkedHashSet<String> values=new LinkedHashSet<>();for(String t:text.getText().toString().split("[、,，\\n]")){if(!t.trim().isEmpty())values.add(t.trim());}repo.update(id,x->{x.tags=String.join("、",values);x.tagsLocked=true;});}).show();}
+    private void tags(Note note) {
+        EditText input = Ui.input(this, "用顿号或逗号分隔标签");
+        input.setText(note.tags);
+        AlertDialog dialog = new AlertDialog.Builder(this).setTitle("修改标签").setView(input)
+            .setNegativeButton("取消", null).setPositiveButton("保存", null).create();
+        dialog.setOnShowListener(d -> dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
+            Set<String> tags = new LinkedHashSet<>();
+            for (String tag : input.getText().toString().split("[、,，\n]")) {
+                if (!tag.trim().isEmpty()) tags.add(tag.trim());
+            }
+            if (repo.editTags(id, note.tags, note.tagsLocked, String.join("、", tags))) dialog.dismiss();
+            else toast(repo.error);
+        }));
+        dialog.show();
+    }
 }

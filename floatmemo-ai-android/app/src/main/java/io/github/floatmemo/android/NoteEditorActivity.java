@@ -47,9 +47,10 @@ public final class NoteEditorActivity extends BaseActivity implements NoteReposi
         toolbar.addView(Ui.button(this,"清单",false,v->BodyEditing.insertList(body,"- [ ] ")));
         toolbar.addView(Ui.button(this,"编号",false,v->BodyEditing.insertList(body,"1. ")));
         TextView spacer=Ui.text(this,"",12,Ui.MUTED);toolbar.addView(spacer,new LinearLayout.LayoutParams(0,1,1));
-        toolbar.addView(Ui.button(this,"更多",false,v->more()));HorizontalScrollView toolbarScroll=new HorizontalScrollView(this);toolbarScroll.setHorizontalScrollBarEnabled(false);toolbarScroll.addView(toolbar);root.addView(toolbarScroll);Ui.space(root,10);
+        toolbar.addView(Ui.button(this,"更多",false,v->more()));HorizontalScrollView toolbarScroll=new HorizontalScrollView(this);toolbarScroll.setHorizontalScrollBarEnabled(false);toolbarScroll.addView(toolbar);
         body=new FormatEditText(this);body.setHint("写点什么…选中文字可滑动选择格式");
-        formatBar=new FormatToolbar(this,body,repo,id);root.addView(formatBar);
+        formatBar=new FormatToolbar(this,body,repo,id,toolbarScroll);
+        root.addView(formatBar,new LinearLayout.LayoutParams(-1,Ui.dp(this,48)));Ui.space(root,10);
         body.setGravity(Gravity.TOP|Gravity.START);
         body.setInputType(android.text.InputType.TYPE_CLASS_TEXT|android.text.InputType.TYPE_TEXT_FLAG_MULTI_LINE|android.text.InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
         body.setHorizontallyScrolling(false);
@@ -98,7 +99,7 @@ public final class NoteEditorActivity extends BaseActivity implements NoteReposi
         binding=true;
         if(!title.getText().toString().equals(n.title))title.setText(n.title);
         if(!body.getText().toString().equals(n.content)){int cursor=body.getSelectionStart();body.setText(n.content);body.setSelection(Math.max(0,Math.min(cursor,n.content.length())));}
-        binding=false;TextStyleSpans.apply(body.getText(),n);applyAppearance();updateMode();
+        binding=false;TextStyleSpans.apply(body,n);applyAppearance();updateMode();
     }
     private void applyAppearance(){
         Note n=repo.find(id);if(n==null)return;
@@ -109,7 +110,7 @@ public final class NoteEditorActivity extends BaseActivity implements NoteReposi
         opacityLabel.setText(getString(R.string.overlay_opacity,Math.round(n.opacity*100)));
     }
     private void updateMode(){
-        if(formatBar!=null){if(previewing)formatBar.setVisibility(View.GONE);else formatBar.refresh();}
+        formatBar.setFormattingEnabled(!previewing);
         body.setVisibility(previewing?View.GONE:View.VISIBLE);previewScroll.setVisibility(previewing?View.VISIBLE:View.GONE);
         if(previewing){
             Note note=repo.find(id);if(note!=null)preview.render(note);

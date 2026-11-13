@@ -16,10 +16,10 @@ public class BackupArchiveTest {
     private Note media(){Note n=new Note();n.content="前面\n"+image.marker()+"\n后面";n.attachments.add(image);return n;}
     private JSONObject document(Note n)throws Exception{return new JSONObject().put("schemaVersion",3).put("notes",new JSONArray().put(n.toJson())).put("history",new JSONArray()).put("edits",new JSONArray()).put("folders",new JSONArray().put("生活"));}
     private File archive(JSONObject data)throws Exception{File zip=new File(root,UUID.randomUUID()+".zip");BackupArchive.write(zip,data,assets);return zip;}
-    @Test public void schemaFourRetainsTrashAssetsAndPresentation()throws Exception{
+    @Test public void backupRetainsTrashAssetsAndPresentation()throws Exception{
         Note n=media();n.task=true;n.completedAt=100;n.deletedAt=200;n.formats=TextFormat.set(n.formats,0,2,"bold",1);
         try(BackupArchive.Prepared p=BackupArchive.read(archive(document(n).put("schemaVersion",4)),root)){
-            assertEquals(4,p.root.getInt("schemaVersion"));Note restored=Note.fromJson(p.root.getJSONArray("notes").getJSONObject(0));assertEquals(200,restored.deletedAt);assertTrue(NoteTasks.done(restored));assertEquals(1,restored.formats.size());assertArrayEquals(bytes,Files.readAllBytes(new File(p.assets,image.id).toPath()));
+            assertEquals(BackupArchive.SCHEMA_VERSION,p.root.getInt("schemaVersion"));Note restored=Note.fromJson(p.root.getJSONArray("notes").getJSONObject(0));assertEquals(200,restored.deletedAt);assertTrue(NoteTasks.done(restored));assertEquals(1,restored.formats.size());assertArrayEquals(bytes,Files.readAllBytes(new File(p.assets,image.id).toPath()));
         }
     }
     @Test public void mediaAndNoteRestorePreservesExactBytesAndOriginalText()throws Exception{

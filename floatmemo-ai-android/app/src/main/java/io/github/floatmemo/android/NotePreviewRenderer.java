@@ -42,7 +42,7 @@ public final class NotePreviewRenderer extends LinearLayout {
             if(item.start>cursor)addText(n,part.text.substring(cursor,item.start),part.start+cursor);
             int absolute=part.start+item.start;boolean checked=n.checks.containsKey(absolute)?n.checks.get(absolute):item.checked;
             LinearLayout row=Ui.row(getContext());CheckBox box=new CheckBox(getContext());box.setChecked(checked);box.setContentDescription(checked?"取消勾选":"勾选完成");
-            TextView text=Ui.text(getContext(),"",n.fontSize,Ui.INK);text.setText(Markdown.render(part.text.substring(item.textStart,item.end),n,part.start+item.textStart));
+            TextView text=Ui.text(getContext(),"",n.fontSize,Ui.INK);text.setText(Markdown.render(getContext(),part.text.substring(item.textStart,item.end),n,part.start+item.textStart));
             if(checked)text.setPaintFlags(text.getPaintFlags()|android.graphics.Paint.STRIKE_THRU_TEXT_FLAG);text.setAlpha(checked?.55f:1f);text.setTextIsSelectable(true);
             row.addView(box);row.addView(text,new LinearLayout.LayoutParams(0,-2,1));addView(row);
             box.setOnCheckedChangeListener((button,value)->{if(!NoteRepository.get(getContext()).checkItem(n.id,n.revision,absolute,value)){box.setOnCheckedChangeListener(null);box.setChecked(checked);Toast.makeText(getContext(),"内容已改变或状态未保存，请刷新后重试",Toast.LENGTH_LONG).show();}});
@@ -50,6 +50,6 @@ public final class NotePreviewRenderer extends LinearLayout {
         }
         if(cursor<part.text.length())addText(n,part.text.substring(cursor),part.start+cursor);
     }
-    private void addText(Note n,String raw,int offset){TextView text=Ui.text(getContext(),"",n.fontSize,Ui.INK);text.setText(Markdown.render(raw,n,offset));text.setTextIsSelectable(true);addView(text);}
+    private void addText(Note n,String raw,int offset){TextView text=Ui.text(getContext(),"",n.fontSize,Ui.INK);text.setText(Markdown.render(getContext(),raw,n,offset));text.setTextIsSelectable(true);addView(text);}
 
 }
