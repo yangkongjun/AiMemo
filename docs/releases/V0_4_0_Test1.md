@@ -1,5 +1,7 @@
 # V0.4.0 Test1：格式、待办、提醒与批量管理
 
+> 历史版本记录。当前操作和备份兼容性见 [安卓使用说明](../../floatmemo-ai-android/README.md)。
+
 2026-11-07。仅在 `feature/note-tasks-format-reminders` 测试分支交付，基线为floatmemo-ai的bb64680；不合并、不移动原分支。versionName为0.4.0-test1，versionCode为12。
 
 ## 安装前

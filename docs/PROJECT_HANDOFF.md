@@ -1,6 +1,6 @@
 # FloatMemo AI 当前交接
 
-核对日期：2026-11-13。本页描述当前安卓工程；版本以 [app/build.gradle](../floatmemo-ai-android/app/build.gradle) 为准，本分支交付为 **V0.4.0 Test3（versionName 0.4.0-test3，versionCode 14）**；测试分支为feature/note-tasks-format-reminders，floatmemo-ai基线bb64680保持V0.3.2。测试版操作与边界见 [发布记录](releases/V0_4_0_Test3.md)，不再把旧版本并列为“当前”。
+2026-11-14 核对。测试分支 `feature/note-tasks-format-reminders` 对应 **V0.4.0 Test3**（versionName 0.4.0-test3，versionCode 14）。版本以 [app/build.gradle](../floatmemo-ai-android/app/build.gradle) 为准。现有 APK 的源码提交是 `290c769`，本次为文档收尾。常规交付分支 `floatmemo-ai` 对应 V0.3.2（`bb64680`）。
 
 ## 从这里继续
 
@@ -23,11 +23,9 @@ Java原生Android，minSdk26、compile/target35、JDK17、AGP8.7.3、Gradle8.9�
 
 预算默认值、范围与stream开关以RequestOptions及AiConfig.Snapshot为准：整理8192、搜索4096 token，读取等待120秒，候选10篇，正文总摘录12000字符，流式默认开启；短连接测试仍为64 token非流式。读取等待不是总任务时长保证，应用允许值也不是服务商容量承诺。
 
-## 测试版新增入口
+## 测试分支入口
 
-本次明确批准选中文字后横向滑动工具栏，以及此前讨论的清单、编号、待办/完成、截止提醒、当前范围多选和回收站。TaskUi/NoteTasks负责状态；TextFormat/TextStyleSpans/FormatToolbar/BodyEditing负责局部样式与列表；ReminderScheduler/Receiver负责系统提醒；NoteManageActivity负责批量。
-
-格式、勾选和任务元数据独立于AI正文指纹。备份 schemaVersion 5 可读旧版 1–4，包含回收站及引用原图；导入新便签关闭提醒，保留截止日期；回收站恢复会重排有效且未发送的提醒。Test2 为两个阶段分别保存通知方式和发送时间，到期时仍未完成才发送逾期通知。开发边界见 [开发补充](developer/V0_4_0_Test1_Development.md)。
+[安卓使用说明](../floatmemo-ai-android/README.md)汇总工具栏切换、标签撤回、待办提醒和回收站操作。[开发指南](developer/V0_4_0_Test1_Development.md)说明代码入口、存储和提醒机制。
 
 ## 开发与交付
 
@@ -38,12 +36,10 @@ Java原生Android，minSdk26、compile/target35、JDK17、AGP8.7.3、Gradle8.9�
 
 ## 验证边界
 
-Test3 完成生产编译、174 项 JVM 回归、APK 签名与结构检查。新增测试覆盖选区加粗、混合字号增减、旧字号替换及颜色和字号持久化。真机选区、菜单、标签撤回、手机通知及覆盖安装待测。见 [VALIDATION](../floatmemo-ai-android/VALIDATION.md)。
+Test3 原交付通过生产编译和 174 项 JVM 回归。2026-11-14 复核现有 APK 的版本、哈希、签名和安装结构。选区、弹出菜单、SQLite 撤回、系统通知和覆盖安装的正式真机验证仍待记录。见 [验证记录](../floatmemo-ai-android/VALIDATION.md)。
 
 仍待验证：真机覆盖升级与数据恢复、图文/卡片/旋转/返回/大字体等交互、Android实际SQLite与文件故障、真实模型兼容性与长请求、固定笔记集的召回/忠实度/纠正负担/费用。本环境未确认用户手机的现役版本，也未证实此前偶发断连的唯一原因。
 
-## 2026-11-04知识整理（历史）
+## 收尾记录
 
-删除文件0个。删改的是过时的“当前”版本、固定3000 token/旧搜索片段说法及早期归档指引；原需求、方案、历史发布与验证记录保留。未完成想法集中保留在需求状态页，不另外建立平行计划。
-
-该次只整理文档和规则，应用源码、配置、签名及数据格式不变。检查范围与结果见 [知识整理检查记录](../floatmemo-ai-android/verification/knowledge_closeout_20261104.json)。跨会话历史检索不可用，提醒据仓库与当前可见对话整理；未列出不视为放弃。Windows及其他项目、平台生成记忆和手机现场状态不在本次修改范围。
+[2026-11-14](../floatmemo-ai-android/verification/knowledge_closeout_20261114.json)记录本次核对结果。[2026-11-04](../floatmemo-ai-android/verification/knowledge_closeout_20261104.json)对应 V0.3.2 的历史收尾。

@@ -1,6 +1,6 @@
 # FloatMemo AI 开发约定
 
-- Android工程是 `floatmemo-ai-android/`。继续工作先读 `docs/PROJECT_HANDOFF.md`、`floatmemo-ai-android/REQUIREMENT_STATUS.md`；版本以app/build.gradle为准，验证以VALIDATION.md为准。
+- Android工程是 `floatmemo-ai-android/`。继续工作先读 `docs/PROJECT_HANDOFF.md`、`floatmemo-ai-android/REQUIREMENT_STATUS.md`；版本以 `floatmemo-ai-android/app/build.gradle` 为准，验证见 `floatmemo-ai-android/VALIDATION.md`。
 - 原有目标、未完成想法与讨论建议分开记录；长期未做不代表取消，提醒不等于开发授权。知识整理保留未完成事项，未知用途或含唯一内容的文件先保留。
 - 本项目用户界面及交付说明使用自然中文。尽量让小改动能由用户按开发手册自行完成。
 - 接口地址按用户所填原样使用，不自动补路径、换模型或引入隐藏的付费请求。
@@ -10,6 +10,6 @@
 - 不强制推送、不重写历史、不擅自合并主分支。遇到远端变化先读取和协调，不覆盖无关修改。
 - 不提交 API Key、签名私钥、密码文件、个人笔记、私人服务响应或诊断正文、SDK、构建缓存和大型归档。公开示例必须为明确的合成样例。
 - 应用变更继续交付APK，纯文档整理不重新打包或递增版本。发布GitHub Release或配置CI另按用户指示，不因源码推送自动公开安装包。
-- 验证报告必须区分本次实测、既有记录和未测项目；原基线52项 JVM 测试不等于新功能、真机或所有服务验收通过。
+- 验证报告必须区分本次实测、既有记录和未测项目；JVM 测试只验证其覆盖范围。
 - 短连接测试、JVM回归及APK检查不能替代真实模型、手机UI和覆盖升级验收；不能把既有合成测试写成已复现或修复真实服务断连。
 - 技术入口、批准范围、历史与待测项通过上述交接/需求状态和 `docs/GIT_DELIVERY.md` 查找，不在规则文件逐版追加流水账。

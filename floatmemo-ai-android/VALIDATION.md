@@ -6,7 +6,7 @@ APK 包名 io.github.floatmemo.android，versionName 0.4.0-test3，versionCode 1
 
 APK SHA-256：`34a49dd02622a76e6da330565e9458d51822f100f0ec604dff6bca7cc093d3a9`。
 
-手机选区和弹出菜单、SQLite 撤回及覆盖安装待测。见 [Test3 操作说明](../docs/releases/V0_4_0_Test3.md)。
+2026-11-14 文档收尾复核了现有 Test3 APK 的包名、版本、SHA-256、签名和安装结构。174 项为 2026-11-13 的回归记录。手机选区和弹出菜单、SQLite 撤回及覆盖安装待测。见 [Test3 操作说明](../docs/releases/V0_4_0_Test3.md)。
 
 ---
 

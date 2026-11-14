@@ -1,6 +1,6 @@
 # 每次交付的 Git 同步约定
 
-目标仓库为 https://github.com/yangkongjun/AiMemo.git ，源码与文档默认交付分支为 **floatmemo-ai**。本次用户指定测试分支，V0.4.0 Test1只提交到 **feature/note-tasks-format-reminders**，不移动floatmemo-ai、不合并main。main保留导航，不自动合并。当前实现与历史批准范围分别见 [交接](PROJECT_HANDOFF.md)、[需求状态](../floatmemo-ai-android/REQUIREMENT_STATUS.md) 和 [原审核方案](planning/FloatMemo_Change_Proposal_V0_3_Review.md)。
+目标仓库为 [yangkongjun/AiMemo](https://github.com/yangkongjun/AiMemo)。默认交付到 `floatmemo-ai`，经用户指定的测试功能交付到对应测试分支。目前 V0.4.0 测试系列在 `feature/note-tasks-format-reminders`，`floatmemo-ai` 对应 V0.3.2。main 用于导航。各分支的当前状态见 [项目交接](PROJECT_HANDOFF.md)。
 
 每次完成可交付代码或文档版本后：
 
@@ -13,5 +13,3 @@
 每条聊天回复和中间草稿不单独提交。纯文档交付检查链接、事实和改动范围，不重建APK或调用模型；应用交付须按当前构建与原签名维护流程提供安装包。APK发布GitHub Release、CI与自动发布需另有明确指示，不能因源码同步而自动公开安装包。
 
 失败时区分“本地完成”“已提交”“远端未成功”，保留成果，不声称存在后台重试或无人值守任务。仓库同步不包含手机笔记同步或云备份。
-
-先前批准的生成预算、插图、搜索优化及标签卡片已分别形成交付记录；不再保留空仓库初始化或“尚未批准三项功能”作为当前操作指引。未完成目标及讨论线索保留在需求状态页，不把记录提醒当作新的功能实施授权。

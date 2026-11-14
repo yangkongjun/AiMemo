@@ -1,0 +1,55 @@
+{
+  "date": "2026-11-14",
+  "scope": "FloatMemo Android test branch documentation and project rules",
+  "baseline_commit": "290c7691bf22502a2a1dabca4986f3a9d9a33ccd",
+  "application_version": "0.4.0-test3",
+  "versionCode": 14,
+  "backup_schema": 5,
+  "deleted_files": [],
+  "facts": {
+    "code": {
+      "state": "verified-current",
+      "evidence": "Checked source for version, size presets, tag undo and both reminder stages. Application files are byte-identical to the baseline."
+    },
+    "runtime": {
+      "state": "pending",
+      "evidence": "Existing APK package, version, SHA-256, signer and ZIP layout verified. Installed phone version and live behavior not inspected."
+    },
+    "docs": {
+      "state": "changed-and-verified",
+      "evidence": "Entry points and development guide aligned to Test3. Test1 and Test2 release records labelled historical. Pending goals retained."
+    },
+    "rules": {
+      "state": "changed-and-verified",
+      "evidence": "Project rule chain inspected; version and validation paths clarified. No tracked APK, private key or SDK/build output found."
+    },
+    "memory": {
+      "state": "out-of-scope",
+      "evidence": "Host-generated memory was read-only."
+    },
+    "workspace": {
+      "state": "verified-current",
+      "evidence": "One worktree and no unexpected nonignored files. Build links, toolchain, backups and APKs retained."
+    }
+  },
+  "existing_artifact": {
+    "apk": "FloatMemo_AI_Android_V0_4_0_Test3.apk",
+    "sha256": "34a49dd02622a76e6da330565e9458d51822f100f0ec604dff6bca7cc093d3a9",
+    "prior_jvm_pass_count": 174
+  },
+  "pending": [
+    "Device upgrade and data recovery",
+    "Selection and popup gestures",
+    "SQLite tag undo",
+    "System reminder sound and delivery",
+    "Actual model connectivity and quality evaluation"
+  ],
+  "retained_candidates": [
+    "Generic V0_4_0.apk equals the named Test3 APK and is the build script's output. It and its signature sidecar are retained."
+  ],
+  "out_of_scope": [
+    "Windows and other projects",
+    "Phone notes, global rules and generated memory",
+    "Deletion of existing toolchain, APKs and workspace archives"
+  ]
+}
